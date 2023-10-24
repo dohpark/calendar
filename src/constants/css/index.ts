@@ -8,8 +8,6 @@ export const fractions = {
   'auto-end': 'grid-cols-auto-end',
 } as const;
 
-export type FractionType = keyof typeof fractions;
-
 export const gaps = {
   '0': `gap-0`,
   '1': `gap-1`,
@@ -22,4 +20,20 @@ export const gaps = {
   '8': 'gap-8',
 } as const;
 
-export type GapType = keyof typeof gaps;
+export const justifyContents = {
+  start: 'justify-start',
+  end: 'justify-end',
+  center: 'justify-center',
+  between: 'justify-between',
+  around: 'justify-around',
+  evenly: 'justify-evenly',
+  stretch: 'justify-stretch',
+} as const;
+
+export const alignItems = {
+  start: 'items-start',
+  end: 'items-end',
+  center: 'items-center',
+  baseline: 'items-baseline',
+  stretch: 'items-stretch',
+} as const;
