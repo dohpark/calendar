@@ -6,8 +6,11 @@ interface SplitProps {
   children: React.ReactNode;
   fraction: FractionType;
   gap: GapType;
+  classExtend?: string[];
 }
 
-export default function Split({ children, fraction, gap }: SplitProps) {
-  return <div className={`grid ${fractions[fraction]} ${gaps[gap]}`}>{children}</div>;
+export default function Split({ children, fraction, gap, classExtend }: SplitProps) {
+  const classExtension = classExtend ? classExtend.join(' ') : '';
+
+  return <div className={`grid ${fractions[fraction]} ${gaps[gap]} ${classExtension}`}>{children}</div>;
 }

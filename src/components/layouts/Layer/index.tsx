@@ -4,11 +4,11 @@ import { GapType } from '@/types/css';
 interface LayerProps {
   children: React.ReactNode;
   gap: GapType;
-  classExtend: string[];
+  classExtend?: string[];
 }
 
 export default function Layer({ children, gap, classExtend }: LayerProps) {
-  const classExtension = classExtend.join(' ');
+  const classExtension = classExtend ? classExtend.join(' ') : '';
 
   return <div className={`grid ${gaps[gap]} ${classExtension}`}>{children}</div>;
 }
