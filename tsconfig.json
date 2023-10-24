@@ -13,6 +13,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "declaration": true,
+    "declarationDir": "./types",
     "plugins": [
       {
         "name": "next"
@@ -23,6 +25,6 @@
       "@public/*": ["./public/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["types/next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
