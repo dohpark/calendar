@@ -1,22 +1,33 @@
 'use client';
 
+import { useState } from 'react';
 import Inline from '@/components/layouts/Inline';
 import Split from '@/components/layouts/Split';
+import IconButton from '@/components/common/IconButton';
+import TextButton from '@/components/common/TextButton';
+import ListBox from '@/components/common/ListBox';
 import Calendar from '@public/svg/calendar.svg';
 import Hamburger from '@public/svg/hamburger.svg';
 import Left from '@public/svg/left.svg';
 import Right from '@public/svg/right.svg';
 import DropDown from '@public/svg/drop_down.svg';
-import IconButton from '@/components/common/IconButton';
-import TextButton from '../common/TextButton';
+import ListItem from '@/components/Header/ListItem';
+import { ListItemType } from './types';
 
 export default function Header() {
+  const [isDropdownHidden, setIsDropdownHidden] = useState(true);
+
+  const handleDropdown = () => {
+    setIsDropdownHidden((state) => !state);
+  };
+
   return (
     <header>
       <Split fraction="auto-start" gap="0" classExtend={['p-2']}>
         <div className="w-[238px]">
           <Inline gap="0" justify="start" align="center">
             <IconButton
+              aria-label="hamburger button"
               classExtend={['p-3', 'mx-1']}
               onClick={() => {
                 console.log('hamburger');
@@ -41,6 +52,7 @@ export default function Header() {
               오늘
             </TextButton>
             <IconButton
+              aria-label="left button"
               classExtend={['p-3']}
               onClick={() => {
                 console.log('left');
@@ -49,6 +61,7 @@ export default function Header() {
               <Left width="12" height="12" />
             </IconButton>
             <IconButton
+              aria-label="right button"
               classExtend={['p-3']}
               onClick={() => {
                 console.log('right');
@@ -56,19 +69,40 @@ export default function Header() {
             >
               <Right width="12" height="12" />
             </IconButton>
-            <span className="text-xl px-4">2023년 10월</span>
-          </Inline>
-          <TextButton
-            classExtend={['text-sm', 'px-3', 'py-2', 'mr-3']}
-            onClick={() => {
-              console.log('일 / 주 / 연도');
-            }}
-          >
-            <span className="pr-1 text-sm">일</span>
-            <span>
-              <DropDown width="16" height="16" className="inline-block " />
+            <span aria-label="selected date" className="text-xl px-4">
+              2023년 10월
             </span>
-          </TextButton>
+          </Inline>
+          <div className="relative">
+            <TextButton
+              aria-label="calendar view unit button"
+              classExtend={['text-sm', 'px-3', 'py-2', 'mr-3']}
+              onClick={handleDropdown}
+            >
+              <span className="pr-1 text-sm">월</span>
+              <span>
+                <DropDown width="16" height="16" className="inline-block " />
+              </span>
+            </TextButton>
+            <ListBox<ListItemType>
+              classExtend={[
+                isDropdownHidden ? 'hidden' : 'block',
+                'absolute',
+                'top-11',
+                'right-3',
+                'grid',
+                'py-2',
+                'w-44',
+              ]}
+              ItemComponent={ListItem}
+              sourceName="item"
+              items={[
+                { key: 'day', dayEng: 'D', dayKor: '일' },
+                { key: 'week', dayEng: 'W', dayKor: '주' },
+                { key: 'month', dayEng: 'M', dayKor: '월' },
+              ]}
+            />
+          </div>
         </Inline>
       </Split>
     </header>
