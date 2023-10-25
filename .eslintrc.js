@@ -4,7 +4,14 @@ module.exports = {
     es6: true,
     node: true,
   },
-  extends: ['next/core-web-vitals', 'airbnb', 'airbnb-typescript', 'prettier'],
+  extends: [
+    'next/core-web-vitals',
+    'airbnb',
+    'airbnb-typescript',
+    'prettier',
+    'plugin:testing-library/react',
+    'plugin:jest-dom/recommended',
+  ],
   parserOptions: {
     sourceType: 'module',
     project: ['./tsconfig.json'],
