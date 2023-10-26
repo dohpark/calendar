@@ -73,9 +73,10 @@ export default function Header() {
               2023년 10월
             </span>
           </Inline>
-          <div className="relative">
+          <nav className="relative">
             <TextButton
               aria-label="calendar view unit button"
+              aria-expanded={!isDropdownHidden}
               classExtend={['text-sm', 'px-3', 'py-2', 'mr-3']}
               onClick={handleDropdown}
             >
@@ -95,6 +96,7 @@ export default function Header() {
                 'w-44',
               ]}
               ItemComponent={ListItem}
+              onClick={handleDropdown}
               sourceName="item"
               items={[
                 { key: 'day', dayEng: 'D', dayKor: '일' },
@@ -102,7 +104,7 @@ export default function Header() {
                 { key: 'month', dayEng: 'M', dayKor: '월' },
               ]}
             />
-          </div>
+          </nav>
         </Inline>
       </Split>
     </header>
