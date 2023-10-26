@@ -14,12 +14,13 @@ import DropDown from '@public/svg/drop_down.svg';
 import ListItem from '@/components/Header/ListItem';
 import { useCalendar } from '@/store/calendar';
 import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
+import { getDisplayedDateWeekUnit } from '@/utils/calendar';
 import { ListItemType } from './types';
 
 export default function Header() {
   const [isDropdownHidden, setIsDropdownHidden] = useState(true);
 
-  const { selectedDate, calendarUnit } = useCalendar();
+  const { selectedDate, calendarUnit, actions } = useCalendar();
 
   const getDisplayedDate = (unit: CalendarUnitEngType) => {
     const year = selectedDate.getFullYear();
@@ -30,7 +31,7 @@ export default function Header() {
       return `${year}년 ${month}월 ${day}일`;
     }
     if (unit === 'W') {
-      return `${year}년 ${month}월`;
+      return getDisplayedDateWeekUnit(selectedDate);
     }
     return `${year}년 ${month}월`;
   };
@@ -39,6 +40,18 @@ export default function Header() {
     if (unit === 'D') return '일';
     if (unit === 'W') return '주';
     return '월';
+  };
+
+  const handleLeftButton = (unit: CalendarUnitEngType) => {
+    if (unit === 'D') actions.setPreviousDay();
+    if (unit === 'W') actions.setPreviousWeek();
+    if (unit === 'M') actions.setPreviousMonthFirstDay();
+  };
+
+  const handleRightButton = (unit: CalendarUnitEngType) => {
+    if (unit === 'D') actions.setNextDay();
+    if (unit === 'W') actions.setNextWeek();
+    if (unit === 'M') actions.setNextMonthFirstDay();
   };
 
   const handleDropdown = () => {
@@ -79,7 +92,7 @@ export default function Header() {
               aria-label="left button"
               classExtend={['p-3']}
               onClick={() => {
-                console.log('left');
+                handleLeftButton(calendarUnit);
               }}
             >
               <Left width="12" height="12" />
@@ -88,7 +101,7 @@ export default function Header() {
               aria-label="right button"
               classExtend={['p-3']}
               onClick={() => {
-                console.log('right');
+                handleRightButton(calendarUnit);
               }}
             >
               <Right width="12" height="12" />

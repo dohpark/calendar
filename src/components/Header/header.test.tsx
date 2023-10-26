@@ -64,9 +64,9 @@ describe.only('왼쪽 및 오른쪽 버튼 기능', () => {
     const calendarViewUnitDay = screen.getByRole('button', { name: /일/ });
     await user.click(calendarViewUnitDay);
 
-    // 2024년 1월 1일 확인
+    // 2023년 11월 1일 확인
     const selectedDate = screen.getByLabelText(/selected date/i);
-    expect(selectedDate).toHaveTextContent(`2024년 1월 1일`);
+    expect(selectedDate).toHaveTextContent(`2023년 11월 1일`);
   });
 
   test('월 단위로 선택 후 오른쪽 버튼 클릭 시 다음 달 1일로 변경된다.', async () => {
@@ -78,8 +78,8 @@ describe.only('왼쪽 및 오른쪽 버튼 기능', () => {
     act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 28)));
 
     // 오른쪽 버튼 클릭 시 다음 달로 이동
-    const calendarLeftButton = screen.getByRole('button', { name: /left button/i });
-    await user.click(calendarLeftButton);
+    const calendarRightButton = screen.getByRole('button', { name: /right button/i });
+    await user.click(calendarRightButton);
 
     // 달력 유닛을 일로 선택
     const calendarViewUnitButton = screen.getByRole('button', { name: /calendar view unit button/i });
@@ -88,12 +88,35 @@ describe.only('왼쪽 및 오른쪽 버튼 기능', () => {
     const calendarViewUnitDay = screen.getByRole('button', { name: /일/ });
     await user.click(calendarViewUnitDay);
 
-    // 2023년 11월 1일을 확인
+    // 2024년 1월 1일을 확인
     const selectedDate = screen.getByLabelText(/selected date/i);
-    expect(selectedDate).toHaveTextContent(`2023년 11월 1일`);
+    expect(selectedDate).toHaveTextContent(`2024년 1월 1일`);
   });
 
   test('일 단위로 선택 후 왼쪽 버튼 클릭 시 전 날로 변경된다.', async () => {
+    const user = userEvent.setup();
+    render(<Header />);
+
+    // 2023년 12월 1일로 날짜 설정
+    const { result } = renderHook(() => useCalendar());
+    act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 1)));
+
+    // 달력 유닛을 일로 선택
+    const calendarViewUnitButton = screen.getByRole('button', { name: /calendar view unit button/i });
+    await user.click(calendarViewUnitButton);
+
+    const calendarViewUnitDay = screen.getByRole('button', { name: /일/ });
+    await user.click(calendarViewUnitDay);
+
+    // 왼쪽 버튼 클릭
+    const calendarLeftButton = screen.getByRole('button', { name: /left button/i });
+    await user.click(calendarLeftButton);
+
+    // 2023년 11월 30일을 확인
+    const selectedDate = screen.getByLabelText(/selected date/i);
+    expect(selectedDate).toHaveTextContent(`2023년 11월 30일`);
+  });
+  test('일 단위로 선택 후 오른쪽 버튼 클릭 시 다음 날로 변경된다.', async () => {
     const user = userEvent.setup();
     render(<Header />);
 
@@ -108,38 +131,15 @@ describe.only('왼쪽 및 오른쪽 버튼 기능', () => {
     const calendarViewUnitDay = screen.getByRole('button', { name: /일/ });
     await user.click(calendarViewUnitDay);
 
-    // 왼쪽 버튼 클릭
-    const calendarLeftButton = screen.getByRole('button', { name: /left button/i });
-    await user.click(calendarLeftButton);
+    // 오른쪽 버튼 클릭
+    const calendarRightButton = screen.getByRole('button', { name: /right button/i });
+    await user.click(calendarRightButton);
 
-    // 2024년 1월 1일을 확인
+    // 2024년 1월 1일일 확인
     const selectedDate = screen.getByLabelText(/selected date/i);
     expect(selectedDate).toHaveTextContent(`2024년 1월 1일`);
   });
-  test('일 단위로 선택 후 오른쪽 버튼 클릭 시 다음 날로 변경된다.', async () => {
-    const user = userEvent.setup();
-    render(<Header />);
-
-    // 2023년 12월 1일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
-    act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 11)));
-
-    // 달력 유닛을 일로 선택
-    const calendarViewUnitButton = screen.getByRole('button', { name: /calendar view unit button/i });
-    await user.click(calendarViewUnitButton);
-
-    const calendarViewUnitDay = screen.getByRole('button', { name: /일/ });
-    await user.click(calendarViewUnitDay);
-
-    // 오른쪽 버튼 클릭
-    const calendarLeftButton = screen.getByRole('button', { name: /left button/i });
-    await user.click(calendarLeftButton);
-
-    // 2023년 11월 30일 확인
-    const selectedDate = screen.getByLabelText(/selected date/i);
-    expect(selectedDate).toHaveTextContent(`2023년 11월 30일`);
-  });
-  test('주 단위로 선택 후 두 개의 달이 겹치는 주일 경우 "0000년 00일 - 0000년 00일 형식으로 보이게 한다.', async () => {
+  test('주 단위로 선택 후 두 개의 달이 겹치는 주일 경우 "0000년 00월 - 00월 형식으로 보이게 한다.', async () => {
     const user = userEvent.setup();
     render(<Header />);
 
@@ -154,9 +154,28 @@ describe.only('왼쪽 및 오른쪽 버튼 기능', () => {
     const calendarViewUnitWeek = screen.getByRole('button', { name: /주/ });
     await user.click(calendarViewUnitWeek);
 
-    // 2023년 10월 - 2023년 11월 확인
+    // 2023년 10월 - 11월 확인
     const selectedDate = screen.getByLabelText(/selected date/i);
-    expect(selectedDate).toHaveTextContent(`2023년 10월 - 2023년 11월`);
+    expect(selectedDate).toHaveTextContent(`2023년 10월 - 11월`);
+  });
+  test('주 단위로 선택 후 두 개의 연도가 다른 주일 경우 "0000년 00월 - 0000년 00월 형식으로 보이게 한다.', async () => {
+    const user = userEvent.setup();
+    render(<Header />);
+
+    // 2023년 12월 31일로 날짜 설정
+    const { result } = renderHook(() => useCalendar());
+    act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 31)));
+
+    // 달력 유닛을 주로 선택
+    const calendarViewUnitButton = screen.getByRole('button', { name: /calendar view unit button/i });
+    await user.click(calendarViewUnitButton);
+
+    const calendarViewUnitWeek = screen.getByRole('button', { name: /주/ });
+    await user.click(calendarViewUnitWeek);
+
+    // 2023년 12월 - 2024년 1월 확인
+    const selectedDate = screen.getByLabelText(/selected date/i);
+    expect(selectedDate).toHaveTextContent(`2023년 12월 - 2024년 1월`);
   });
 });
 

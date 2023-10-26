@@ -27,22 +27,42 @@ const useCalendar = create<CalendarState & CalendarAction>((set) => ({
     setSelectedDate: (date) => set(() => ({ selectedDate: date })),
     setNextMonthFirstDay: () =>
       set(({ selectedDate }) => {
-        selectedDate.setMonth(selectedDate.getMonth() + 1);
-        selectedDate.setDate(0);
-        const nextMonth = selectedDate;
-        return { selectedDate: nextMonth };
+        const targetDate = new Date(selectedDate);
+        targetDate.setMonth(targetDate.getMonth() + 1);
+        targetDate.setDate(1);
+        return { selectedDate: targetDate };
       }),
     setPreviousMonthFirstDay: () =>
       set(({ selectedDate }) => {
-        selectedDate.setMonth(selectedDate.getMonth() - 1);
-        selectedDate.setDate(0);
-        const previousMonth = selectedDate;
-        return { selectedDate: previousMonth };
+        const targetDate = new Date(selectedDate);
+        targetDate.setMonth(targetDate.getMonth() - 1);
+        targetDate.setDate(1);
+        return { selectedDate: targetDate };
       }),
-    setNextWeek: () => set(() => ({})),
-    setPreviousWeek: () => set(() => ({})),
-    setNextDay: () => set(() => ({})),
-    setPreviousDay: () => set(() => ({})),
+    setNextWeek: () =>
+      set(({ selectedDate }) => {
+        const targetDate = new Date(selectedDate);
+        targetDate.setDate(targetDate.getDate() + 7);
+        return { selectedDate: targetDate };
+      }),
+    setPreviousWeek: () =>
+      set(({ selectedDate }) => {
+        const targetDate = new Date(selectedDate);
+        targetDate.setDate(targetDate.getDate() - 7);
+        return { selectedDate: targetDate };
+      }),
+    setNextDay: () =>
+      set(({ selectedDate }) => {
+        const targetDate = new Date(selectedDate);
+        targetDate.setDate(targetDate.getDate() + 1);
+        return { selectedDate: targetDate };
+      }),
+    setPreviousDay: () =>
+      set(({ selectedDate }) => {
+        const targetDate = new Date(selectedDate);
+        targetDate.setDate(targetDate.getDate() - 1);
+        return { selectedDate: targetDate };
+      }),
   },
 }));
 
