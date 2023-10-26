@@ -83,7 +83,7 @@ export default function Header() {
             <TextButton
               classExtend={['text-sm', 'px-5', 'py-2', 'mr-3']}
               onClick={() => {
-                console.log('오늘');
+                actions.setSelectedDate(new Date());
               }}
             >
               오늘

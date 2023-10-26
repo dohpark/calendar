@@ -44,7 +44,7 @@ describe('달력 단위 변경', () => {
   });
 });
 
-describe.only('왼쪽 및 오른쪽 버튼 기능', () => {
+describe('왼쪽 및 오른쪽 버튼 기능', () => {
   test('월 단위로 선택 후 왼쪽 버튼 클릭 시 전 달 1일로 변경된다.', async () => {
     const user = userEvent.setup();
     render(<Header />);
@@ -180,7 +180,30 @@ describe.only('왼쪽 및 오른쪽 버튼 기능', () => {
 });
 
 describe('오늘 버튼', () => {
-  test('오늘 버튼 클릭 시 오늘 날짜로 변경된다', () => {});
+  test('오늘 버튼 클릭 시 오늘 날짜로 변경된다', async () => {
+    const user = userEvent.setup();
+    render(<Header />);
+
+    // 2022년 4월 3일로 날짜 설정
+    const { result } = renderHook(() => useCalendar());
+    act(() => result.current.actions.setSelectedDate(new Date(2022, 3, 3)));
+
+    // 오늘 버튼 클릭
+    const todayButton = screen.getByRole('button', { name: /오늘/ });
+    await user.click(todayButton);
+
+    // 달력 유닛을 일로 선택
+    const calendarViewUnitButton = screen.getByRole('button', { name: /calendar view unit button/i });
+    await user.click(calendarViewUnitButton);
+
+    const calendarViewUnitDay = screen.getByRole('button', { name: /일/ });
+    await user.click(calendarViewUnitDay);
+
+    // 오늘 날짜 확인
+    const today = new Date();
+    const selectedDate = screen.getByLabelText(/selected date/i);
+    expect(selectedDate).toHaveTextContent(`${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`);
+  });
 });
 
 describe('햄버거 버튼을 통한 사이드바 관리', () => {
