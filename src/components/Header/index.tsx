@@ -12,10 +12,34 @@ import Left from '@public/svg/left.svg';
 import Right from '@public/svg/right.svg';
 import DropDown from '@public/svg/drop_down.svg';
 import ListItem from '@/components/Header/ListItem';
+import { useCalendar } from '@/store/calendar';
+import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
 import { ListItemType } from './types';
 
 export default function Header() {
   const [isDropdownHidden, setIsDropdownHidden] = useState(true);
+
+  const { selectedDate, calendarUnit } = useCalendar();
+
+  const getDisplayedDate = (unit: CalendarUnitEngType) => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth() + 1;
+    const day = selectedDate.getDate();
+
+    if (unit === 'D') {
+      return `${year}년 ${month}월 ${day}일`;
+    }
+    if (unit === 'W') {
+      return `${year}년 ${month}월`;
+    }
+    return `${year}년 ${month}월`;
+  };
+
+  const getDisplayedCalendarUnit = (unit: CalendarUnitEngType): CalendarUnitKorType => {
+    if (unit === 'D') return '일';
+    if (unit === 'W') return '주';
+    return '월';
+  };
 
   const handleDropdown = () => {
     setIsDropdownHidden((state) => !state);
@@ -70,7 +94,7 @@ export default function Header() {
               <Right width="12" height="12" />
             </IconButton>
             <span aria-label="selected date" className="text-xl px-4">
-              2023년 10월
+              {getDisplayedDate(calendarUnit)}
             </span>
           </Inline>
           <nav className="relative">
@@ -80,7 +104,7 @@ export default function Header() {
               classExtend={['text-sm', 'px-3', 'py-2', 'mr-3']}
               onClick={handleDropdown}
             >
-              <span className="pr-1 text-sm">월</span>
+              <span className="pr-1 text-sm">{getDisplayedCalendarUnit(calendarUnit)}</span>
               <span>
                 <DropDown width="16" height="16" className="inline-block " />
               </span>

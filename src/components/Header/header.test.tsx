@@ -33,13 +33,13 @@ describe('달력 단위 변경', () => {
     const calendarViewUnitButton = screen.getByRole('button', { name: /calendar view unit button/i });
     await user.click(calendarViewUnitButton);
 
-    const calendarViewUnitDay = screen.getAllByRole('listitem').filter((item) => item.textContent === '일D')[0];
+    const calendarViewUnitDay = screen.getByRole('button', { name: /일/ });
     await user.click(calendarViewUnitDay);
 
     const today = new Date();
 
     const selectedDate = screen.getByLabelText(/selected date/i);
-    expect(selectedDate).toHaveTextContent(`${today.getFullYear}년 ${today.getMonth() + 1}월 ${today.getDate()}일`);
+    expect(selectedDate).toHaveTextContent(`${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`);
   });
 });
 
