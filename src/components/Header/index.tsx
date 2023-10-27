@@ -67,7 +67,7 @@ export default function Header() {
               aria-label="hamburger button"
               classExtend={['p-3', 'mx-1']}
               onClick={() => {
-                console.log('hamburger');
+                actions.toggleSidebar();
               }}
             >
               <Hamburger width="24" height="24" />

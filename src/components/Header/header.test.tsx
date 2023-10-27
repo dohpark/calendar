@@ -1,4 +1,4 @@
-import { act, render, renderHook, screen, within } from '@testing-library/react';
+import { act, render, renderHook, screen, within } from '@/test-utils/testingLibrary';
 import userEvent from '@testing-library/user-event';
 import Header from '@/components/Header';
 import { useCalendar } from '@/store/calendar';
@@ -204,10 +204,4 @@ describe('오늘 버튼', () => {
     const selectedDate = screen.getByLabelText(/selected date/i);
     expect(selectedDate).toHaveTextContent(`${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`);
   });
-});
-
-describe('햄버거 버튼을 통한 사이드바 관리', () => {
-  test('디폴트로 사이드바가 화면에 나타나 있다', () => {});
-
-  test('햄버거 버튼을 활용하여 사이드바를 열고 닫을 수 있다', () => {});
 });
