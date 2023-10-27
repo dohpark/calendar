@@ -16,10 +16,12 @@ import CalendarUnitListItem from '@/components/Header/CalendarUnitListItem';
 import { useCalendar } from '@/store/calendar';
 import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
 import { getDisplayedDateWeekUnit } from '@/utils/calendar';
-import { CalendarUnitListItemType } from './types';
+import { CalendarCreateListItemType, CalendarUnitListItemType } from './types';
+import CalendarCreateListItem from './CalendarCreateListItem';
 
 export default function Header() {
   const [isDropdownHidden, setIsDropdownHidden] = useState(true);
+  const [isCreateDropdownHidden, setCreateDropdownHidden] = useState(true);
 
   const { selectedDate, calendarUnit, actions, isSidebarOpen } = useCalendar();
 
@@ -57,6 +59,10 @@ export default function Header() {
 
   const handleDropdown = () => {
     setIsDropdownHidden((state) => !state);
+  };
+
+  const handleCreateDropdown = () => {
+    setCreateDropdownHidden((state) => !state);
   };
 
   return (
@@ -149,9 +155,7 @@ export default function Header() {
         <IconButton
           aria-label="create event / todo button"
           classExtend={['p-2', 'shadow-box-1']}
-          onClick={() => {
-            console.log('create');
-          }}
+          onClick={handleCreateDropdown}
         >
           <span>
             <Plus width="36" height="36" className="inline-block" />
@@ -165,6 +169,24 @@ export default function Header() {
             </>
           ) : null}
         </IconButton>
+        <ListBox<CalendarCreateListItemType>
+          classExtend={[
+            isCreateDropdownHidden ? 'hidden' : 'block',
+            'relative',
+            'top-2',
+            'left-3',
+            'grid',
+            'py-2',
+            'w-35',
+          ]}
+          ItemComponent={CalendarCreateListItem}
+          onClick={handleCreateDropdown}
+          sourceName="calendarUnitItem"
+          items={[
+            { key: 'event', createType: 'event' },
+            { key: 'todo', createType: 'todo' },
+          ]}
+        />
       </div>
     </header>
   );

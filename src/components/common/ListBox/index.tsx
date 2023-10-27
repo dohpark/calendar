@@ -20,7 +20,7 @@ export default function ListBox<T extends DefaultItem>({
   const classExtension = classExtend ? classExtend.join(' ') : '';
 
   return (
-    <ul className={`shadow-box rounded z-10 bg-white ${classExtension}`}>
+    <ul className={`shadow-box-1 rounded z-10 bg-white ${classExtension}`}>
       {items.map((item) => (
         <ItemComponent key={item.key} onClick={handleClickItem} {...{ [sourceName]: item }} />
       ))}

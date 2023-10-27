@@ -6,7 +6,7 @@ interface ListItemProps {
   onClick: () => void;
 }
 
-export default function ListItem({ calendarUnitItem, onClick: handleClickItem }: ListItemProps) {
+export default function CalendarUnitListItem({ calendarUnitItem, onClick: handleClickItem }: ListItemProps) {
   const { actions } = useCalendar();
 
   return (
