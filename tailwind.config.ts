@@ -13,6 +13,10 @@ const config: Config = {
         'auto-start': 'auto 1fr',
         'auto-end': '1fr auto',
       },
+      boxShadow: {
+        'box-1': '0px 1px 2px 0px rgba(60,64,67,0.3),0px 1px 3px 1px rgba(60,64,67,0.15)',
+        'box-2': '0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12)',
+      },
     },
   },
   plugins: [],

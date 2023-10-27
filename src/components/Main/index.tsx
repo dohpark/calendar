@@ -1,3 +1,3 @@
 export default function Main() {
-  return <main>main</main>;
+  return <main className="mt-20">main</main>;
 }

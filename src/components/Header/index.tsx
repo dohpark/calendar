@@ -11,6 +11,7 @@ import Hamburger from '@public/svg/hamburger.svg';
 import Left from '@public/svg/left.svg';
 import Right from '@public/svg/right.svg';
 import DropDown from '@public/svg/drop_down.svg';
+import Plus from '@public/svg/plus.svg';
 import ListItem from '@/components/Header/ListItem';
 import { useCalendar } from '@/store/calendar';
 import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
@@ -20,7 +21,7 @@ import { ListItemType } from './types';
 export default function Header() {
   const [isDropdownHidden, setIsDropdownHidden] = useState(true);
 
-  const { selectedDate, calendarUnit, actions } = useCalendar();
+  const { selectedDate, calendarUnit, actions, isSidebarOpen } = useCalendar();
 
   const getDisplayedDate = (unit: CalendarUnitEngType) => {
     const year = selectedDate.getFullYear();
@@ -59,7 +60,7 @@ export default function Header() {
   };
 
   return (
-    <header>
+    <header className="relative border-b border-gray-200">
       <Split fraction="auto-start" gap="0" classExtend={['p-2']}>
         <div className="w-[238px]">
           <Inline gap="0" justify="start" align="center">
@@ -144,6 +145,27 @@ export default function Header() {
           </nav>
         </Inline>
       </Split>
+      <div className="absolute z-10 top-20 left-2">
+        <IconButton
+          aria-label="create event / todo button"
+          classExtend={['p-2', 'shadow-box-1']}
+          onClick={() => {
+            console.log('create');
+          }}
+        >
+          <span>
+            <Plus width="36" height="36" className="inline-block" />
+          </span>
+          {isSidebarOpen ? (
+            <>
+              <span className="px-2 text-sm ">만들기</span>
+              <span className="pr-2">
+                <DropDown width="16" height="16" className="inline-block" />
+              </span>
+            </>
+          ) : null}
+        </IconButton>
+      </div>
     </header>
   );
 }

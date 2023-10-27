@@ -8,7 +8,7 @@ export default function Sidebar() {
   return (
     <aside className={`ease-in duration-200 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-0 ml-[-256px]'}`}>
       <Layer classExtend={['w-[256px]']} gap="0">
-        <div className="bg-red-200">1</div>
+        <div className="bg-red-200 mt-20">1</div>
         <div>2</div>
         <div>3</div>
         <div>4</div>
