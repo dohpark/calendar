@@ -177,7 +177,7 @@ export default function Header() {
             'left-3',
             'grid',
             'py-2',
-            'w-35',
+            'w-36',
           ]}
           ItemComponent={CalendarCreateListItem}
           onClick={handleCreateDropdown}
