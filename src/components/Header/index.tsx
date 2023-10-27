@@ -12,11 +12,11 @@ import Left from '@public/svg/left.svg';
 import Right from '@public/svg/right.svg';
 import DropDown from '@public/svg/drop_down.svg';
 import Plus from '@public/svg/plus.svg';
-import ListItem from '@/components/Header/ListItem';
+import CalendarUnitListItem from '@/components/Header/CalendarUnitListItem';
 import { useCalendar } from '@/store/calendar';
 import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
 import { getDisplayedDateWeekUnit } from '@/utils/calendar';
-import { ListItemType } from './types';
+import { CalendarUnitListItemType } from './types';
 
 export default function Header() {
   const [isDropdownHidden, setIsDropdownHidden] = useState(true);
@@ -123,7 +123,7 @@ export default function Header() {
                 <DropDown width="16" height="16" className="inline-block " />
               </span>
             </TextButton>
-            <ListBox<ListItemType>
+            <ListBox<CalendarUnitListItemType>
               classExtend={[
                 isDropdownHidden ? 'hidden' : 'block',
                 'absolute',
@@ -133,9 +133,9 @@ export default function Header() {
                 'py-2',
                 'w-44',
               ]}
-              ItemComponent={ListItem}
+              ItemComponent={CalendarUnitListItem}
               onClick={handleDropdown}
-              sourceName="item"
+              sourceName="calendarUnitItem"
               items={[
                 { key: 'day', dayEng: 'D', dayKor: '일' },
                 { key: 'week', dayEng: 'W', dayKor: '주' },

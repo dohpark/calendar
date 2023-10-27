@@ -1,6 +1,6 @@
 import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
 
-export interface ListItemType {
+export interface CalendarUnitListItemType {
   key: string;
   dayEng: CalendarUnitEngType;
   dayKor: CalendarUnitKorType;
