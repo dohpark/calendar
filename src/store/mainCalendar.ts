@@ -21,7 +21,7 @@ type CalendarAction = {
   };
 };
 
-const useCalendar = create<CalendarState & CalendarAction>((set) => ({
+const useMainCalendar = create<CalendarState & CalendarAction>((set) => ({
   calendarUnit: 'M',
   selectedDate: new Date(),
   isSidebarOpen: true,
@@ -70,4 +70,4 @@ const useCalendar = create<CalendarState & CalendarAction>((set) => ({
   },
 }));
 
-export { useCalendar };
+export { useMainCalendar };

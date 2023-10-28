@@ -13,7 +13,7 @@ import Right from '@public/svg/right.svg';
 import DropDown from '@public/svg/drop_down.svg';
 import Plus from '@public/svg/plus.svg';
 import CalendarUnitListItem from '@/components/Header/CalendarUnitListItem';
-import { useCalendar } from '@/store/calendar';
+import { useMainCalendar } from '@/store/mainCalendar';
 import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
 import { getDisplayedDateWeekUnit } from '@/utils/calendar';
 import { CalendarCreateListItemType, CalendarUnitListItemType } from './types';
@@ -23,7 +23,7 @@ export default function Header() {
   const [isDropdownHidden, setIsDropdownHidden] = useState(true);
   const [isCreateDropdownHidden, setCreateDropdownHidden] = useState(true);
 
-  const { selectedDate, calendarUnit, actions, isSidebarOpen } = useCalendar();
+  const { selectedDate, calendarUnit, actions, isSidebarOpen } = useMainCalendar();
 
   const getDisplayedDate = (unit: CalendarUnitEngType) => {
     const year = selectedDate.getFullYear();

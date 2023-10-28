@@ -1,7 +1,7 @@
 import { act, render, renderHook, screen, within } from '@/test-utils/testingLibrary';
 import userEvent from '@testing-library/user-event';
 import Header from '@/components/Header';
-import { useCalendar } from '@/store/calendar';
+import { useMainCalendar } from '@/store/mainCalendar';
 
 describe('달력 단위 변경', () => {
   test('달력 단위 선택 버튼의 디폴트 값은 월이다.', () => {
@@ -50,7 +50,7 @@ describe('왼쪽 및 오른쪽 버튼 기능', () => {
     render(<Header />);
 
     // 2023년 12월 28일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
+    const { result } = renderHook(() => useMainCalendar());
     act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 28)));
 
     // 왼쪽 버튼 클릭 시 전 달로 이동
@@ -74,7 +74,7 @@ describe('왼쪽 및 오른쪽 버튼 기능', () => {
     render(<Header />);
 
     // 2023년 12월 28일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
+    const { result } = renderHook(() => useMainCalendar());
     act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 28)));
 
     // 오른쪽 버튼 클릭 시 다음 달로 이동
@@ -98,7 +98,7 @@ describe('왼쪽 및 오른쪽 버튼 기능', () => {
     render(<Header />);
 
     // 2023년 12월 1일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
+    const { result } = renderHook(() => useMainCalendar());
     act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 1)));
 
     // 달력 유닛을 일로 선택
@@ -121,7 +121,7 @@ describe('왼쪽 및 오른쪽 버튼 기능', () => {
     render(<Header />);
 
     // 2023년 12월 31일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
+    const { result } = renderHook(() => useMainCalendar());
     act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 31)));
 
     // 달력 유닛을 일로 선택
@@ -144,7 +144,7 @@ describe('왼쪽 및 오른쪽 버튼 기능', () => {
     render(<Header />);
 
     // 2023년 10월 30일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
+    const { result } = renderHook(() => useMainCalendar());
     act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 30)));
 
     // 달력 유닛을 주로 선택
@@ -163,7 +163,7 @@ describe('왼쪽 및 오른쪽 버튼 기능', () => {
     render(<Header />);
 
     // 2023년 12월 31일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
+    const { result } = renderHook(() => useMainCalendar());
     act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 31)));
 
     // 달력 유닛을 주로 선택
@@ -185,7 +185,7 @@ describe('오늘 버튼', () => {
     render(<Header />);
 
     // 2022년 4월 3일로 날짜 설정
-    const { result } = renderHook(() => useCalendar());
+    const { result } = renderHook(() => useMainCalendar());
     act(() => result.current.actions.setSelectedDate(new Date(2022, 3, 3)));
 
     // 오늘 버튼 클릭

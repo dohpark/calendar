@@ -1,4 +1,4 @@
-import { useCalendar } from '@/store/calendar';
+import { useMainCalendar } from '@/store/mainCalendar';
 import { CalendarUnitListItemType } from './types';
 
 interface ListItemProps {
@@ -7,7 +7,7 @@ interface ListItemProps {
 }
 
 export default function CalendarUnitListItem({ calendarUnitItem, onClick: handleClickItem }: ListItemProps) {
-  const { actions } = useCalendar();
+  const { actions } = useMainCalendar();
 
   return (
     <li key={calendarUnitItem.key} className=" hover:bg-zinc-100 hover:cursor-pointer">
