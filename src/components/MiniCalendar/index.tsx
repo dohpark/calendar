@@ -17,7 +17,7 @@ export default function MiniCalendar({ classExtend }: MiniCalendarProps) {
   const todayMonth = today.getMonth() + 1;
   const todayDate = today.getDate();
 
-  const [displayDate, setDisplayDate] = useState(new Date(todayYear, todayMonth, 1));
+  const [displayDate, setDisplayDate] = useState(new Date(todayYear, todayMonth - 1, 1));
 
   const { selectedDate, actions: mainCalendarActions } = useMainCalendar();
 
