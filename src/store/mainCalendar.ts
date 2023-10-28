@@ -34,6 +34,7 @@ const useMainCalendar = create<CalendarState & CalendarAction>((set) => ({
         const targetDate = new Date(selectedDate);
         targetDate.setMonth(targetDate.getMonth() + 1);
         targetDate.setDate(1);
+
         return { selectedDate: targetDate };
       }),
     setPreviousMonthFirstDay: () =>
