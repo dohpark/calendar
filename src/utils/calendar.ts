@@ -18,3 +18,11 @@ export const getDisplayedDateWeekUnit = (date: Date) => {
   }
   return `${firstDayYear}년 ${firstDayMonth}월 - ${lastDayYear}년 ${lastDayMonth}월`;
 };
+
+export const countMonthDays = (date: Date) => {
+  const targetDate = new Date(date);
+  targetDate.setMonth(targetDate.getMonth() + 1);
+  targetDate.setDate(0);
+
+  return targetDate.getDate();
+};

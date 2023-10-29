@@ -1,4 +1,20 @@
-test('디폴트로 현재 월의 달력을 보인다.', () => {});
+import { render, screen } from '@/test-utils/testingLibrary';
+import MonthCalendar from '@/components/MonthCalendar';
+import { countMonthDays } from '@/utils/calendar';
+
+test('디폴트로 현재 월의 달력을 보인다.', () => {
+  render(<MonthCalendar />);
+  const today = new Date();
+  const todayMonth = today.getMonth() + 1;
+  const todayYear = today.getFullYear();
+  const countDays = countMonthDays(today);
+
+  const regexPattern = new RegExp(`${todayYear}-${todayMonth}`);
+
+  const calendarButtons = screen.getAllByRole('button', { name: regexPattern });
+
+  expect(calendarButtons).toHaveLength(countDays);
+});
 
 test('지난달과 다음달의 날짜의 색상은 gray400이다. 현재 달의 날짜의 색상은 gray800이다.', () => {});
 

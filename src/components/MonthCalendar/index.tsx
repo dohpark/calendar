@@ -3,6 +3,7 @@
 import { useMainCalendar } from '@/store/mainCalendar';
 import IconButton from '@/components/common/IconButton';
 import Layer from '@/components/layouts/Layer';
+import { countMonthDays } from '@/utils/calendar';
 
 export default function MonthCalendar() {
   const { selectedDate } = useMainCalendar();
@@ -13,9 +14,7 @@ export default function MonthCalendar() {
     target.setDate(1);
     const lastMonthDaysofFirstWeekCount = target.getDay();
 
-    target.setMonth(selectedDate.getMonth() + 1);
-    target.setDate(0);
-    const currentMonthDaysCount = target.getDate();
+    const currentMonthDaysCount = countMonthDays(target);
 
     return Math.ceil((currentMonthDaysCount + lastMonthDaysofFirstWeekCount) / 7) * 7;
   };
@@ -50,10 +49,15 @@ export default function MonthCalendar() {
               <IconButton
                 key={`${year}-${month}-${date}`}
                 aria-label={`${year}-${month}-${date}`}
-                classExtend={['w-6', 'h-6', 'p-1']}
+                classExtend={[
+                  date !== 1 ? 'w-6' : '',
+                  'h-6',
+                  'p-1',
+                  month === selectedDate.getMonth() + 1 ? 'text-gray-800' : 'text-gray-400',
+                ]}
                 onClick={() => console.log(date)}
               >
-                {date}
+                {date === 1 ? `${month}월 ${date}일` : date}
               </IconButton>
             </div>
             <div />
