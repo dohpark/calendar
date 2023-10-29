@@ -60,9 +60,9 @@ export default function MiniCalendar({ classExtend }: MiniCalendarProps) {
 
   const getDateButtonCss = (year: number, month: number, date: number) => {
     if (todayYear === year && todayMonth === month && todayDate === date)
-      return 'bg-blue-500 text-white hover:bg-blue-600';
+      return 'bg-blue-500 text-white hover:!bg-blue-600';
     if (selectedDate.getFullYear() === year && selectedDate.getMonth() + 1 === month && selectedDate.getDate() === date)
-      return 'bg-blue-200 text-blue-500 hover:bg-blue-300';
+      return 'bg-blue-200 text-blue-500 hover:!bg-blue-300';
     if (month !== displayDate.getMonth() + 1) return 'text-gray-400';
 
     return 'text-gray-600';
