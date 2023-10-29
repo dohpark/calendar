@@ -1,7 +1,7 @@
 'use client';
 
 import { useMainCalendar } from '@/store/mainCalendar';
-import IconButton from '@/components/common/IconButton';
+import DateButton from '@/components/common/DateButton';
 import Layer from '@/components/layouts/Layer';
 import { countMonthDays } from '@/utils/calendar';
 
@@ -28,6 +28,19 @@ export default function MonthCalendar() {
     return [targetDate.getFullYear(), targetDate.getMonth() + 1, targetDate.getDate()];
   });
 
+  const getDateButtonCss = (year: number, month: number, date: number) => {
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth() + 1;
+    const todayDate = today.getDate();
+
+    if (todayYear === year && todayMonth === month && todayDate === date)
+      return 'bg-blue-500 text-white hover:!bg-blue-600';
+    if (month !== selectedDate.getMonth() + 1) return 'text-gray-400';
+
+    return 'text-gray-800';
+  };
+
   return (
     <>
       <div className="grid grid-cols-7 text-xs text-center text-gray-500">
@@ -46,19 +59,15 @@ export default function MonthCalendar() {
             classExtend={['border-l', 'border-b', 'cursor-pointer', 'grid-rows-auto-start']}
           >
             <div className="pt-1">
-              <IconButton
-                key={`${year}-${month}-${date}`}
-                aria-label={`${year}-${month}-${date}`}
-                classExtend={[
-                  date !== 1 ? 'w-6' : '',
-                  'h-6',
-                  'p-1',
-                  month === selectedDate.getMonth() + 1 ? 'text-gray-800' : 'text-gray-400',
-                ]}
+              <DateButton
+                year={year}
+                month={month}
+                date={date}
+                classExtend={[date !== 1 ? 'w-6' : '!w-auto', getDateButtonCss(year, month, date)]}
                 onClick={() => console.log(date)}
               >
                 {date === 1 ? `${month}월 ${date}일` : date}
-              </IconButton>
+              </DateButton>
             </div>
             <div />
           </Layer>

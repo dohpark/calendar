@@ -3,6 +3,7 @@ import Inline from '@/components/layouts/Inline';
 import Layer from '@/components/layouts/Layer';
 import Split from '@/components/layouts/Split';
 import IconButton from '@/components/common/IconButton';
+import DateButton from '@/components/common/DateButton';
 import Left from '@public/svg/left.svg';
 import Right from '@public/svg/right.svg';
 import { useMainCalendar } from '@/store/mainCalendar';
@@ -110,14 +111,16 @@ export default function MiniCalendar({ classExtend }: MiniCalendarProps) {
         </div>
         <div className="grid grid-cols-7 text-xs text-center">
           {selectedMonthDateArray.map(([year, month, date]) => (
-            <IconButton
+            <DateButton
               key={`${year}-${month}-${date}`}
-              aria-label={`${year}-${month}-${date}`}
-              classExtend={['w-6', 'h-6', 'p-1', 'justify-self-center', getDateButtonCss(year, month, date)]}
+              year={year}
+              month={month}
+              date={date}
+              classExtend={['justify-self-center', getDateButtonCss(year, month, date)]}
               onClick={() => mainCalendarActions.setSelectedDate(new Date(year, month - 1, date))}
             >
               {date}
-            </IconButton>
+            </DateButton>
           ))}
         </div>
       </Layer>
