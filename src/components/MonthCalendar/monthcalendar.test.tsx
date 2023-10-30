@@ -1,4 +1,4 @@
-import { render, renderHook, screen, act, within } from '@/test-utils/testingLibrary';
+import { render, renderHook, screen, act, within, fireEvent } from '@/test-utils/testingLibrary';
 import MonthCalendar from '@/components/MonthCalendar';
 import { countMonthDays } from '@/utils/calendar';
 import { useMainCalendar } from '@/store/mainCalendar';
@@ -107,3 +107,27 @@ test('00일 칸의 이벤트 / 할일 아이템을 클릭시 이벤트 / 할일 
 test('이벤트 및 할일이 너무 많은 경우 00개 더보기가 나타난다.', () => {});
 
 test('00개 더보기 클릭시 이벤트 및 할일 전체를 나타내는 모달이 나타난다.', () => {});
+
+test('날짜를 드래그하여 드래그를 통해 선택한 날짜에 이벤트를 생성할 수 있다. 드래그하여 선택한 날짜의 배경 색상은 blue50이다.', async () => {
+  render(<MonthCalendar />);
+
+  // 2023년 10월 28일로 날짜 설정
+  const { result } = renderHook(() => useMainCalendar());
+  act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 28)));
+
+  // 10월 5일에서 10월 11일까지 마우스 드래그
+  const dateCellStart = screen.getByRole('gridcell', { name: '2023-10-5-cell' });
+  const dateCellEnd = screen.getByRole('gridcell', { name: '2023-10-11-cell' });
+
+  fireEvent.mouseEnter(dateCellStart);
+  fireEvent.mouseDown(dateCellStart);
+  fireEvent.mouseEnter(dateCellEnd);
+
+  expect(dateCellStart).toHaveClass('bg-blue-50');
+  expect(dateCellEnd).toHaveClass('bg-blue-50');
+
+  // 마우스 손 놓으면 모달 나타나기
+  fireEvent.mouseUp(dateCellEnd);
+  const modal = screen.getByRole('dialog');
+  expect(modal).toBeVisible();
+});

@@ -5,7 +5,11 @@ interface ModalPortalProps {
   children: React.ReactNode;
 }
 
-const useModal = () => {
+interface UseModalProps {
+  reset?: () => void;
+}
+
+const useModal = ({ reset }: UseModalProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const openModal = () => {
@@ -14,6 +18,7 @@ const useModal = () => {
 
   const closeModal = () => {
     setModalOpen(false);
+    if (reset) reset();
   };
 
   function ModalPortal({ children }: ModalPortalProps) {
