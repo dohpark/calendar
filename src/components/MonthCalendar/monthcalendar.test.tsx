@@ -1,8 +1,8 @@
-import { render, renderHook, screen } from '@/test-utils/testingLibrary';
+import { render, renderHook, screen, act } from '@/test-utils/testingLibrary';
 import MonthCalendar from '@/components/MonthCalendar';
 import { countMonthDays } from '@/utils/calendar';
 import { useMainCalendar } from '@/store/mainCalendar';
-import { act } from 'react-dom/test-utils';
+import userEvent from '@testing-library/user-event';
 
 test('디폴트로 현재 월의 달력을 보인다.', () => {
   render(<MonthCalendar />);
@@ -58,7 +58,21 @@ test('달의 첫번째 날은 00월 00일로 나타나고 나머지는 00일로 
   expect(decemberFirstButton).toHaveTextContent('12월 1일');
 });
 
-test('00일 칸을 클릭하면 할일 및 이벤트 생성 모달이 나타난다.', () => {});
+test('00일 칸을 클릭하면 할일 및 이벤트 생성 모달이 나타난다.', async () => {
+  const user = userEvent.setup();
+  render(<MonthCalendar />);
+
+  // 2023년 10월 28일로 날짜 설정
+  const { result } = renderHook(() => useMainCalendar());
+  act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 28)));
+
+  // 10월 28일 칸 클릭
+  const dateCell = screen.getByRole('gridcell', { name: '2023-10-28-cell' });
+  await user.click(dateCell);
+
+  const modal = screen.getByRole('dialog');
+  expect(modal).toBeVisible();
+});
 
 test('00일 숫자를 클릭하면 해당 날이 선택되며 달력 표시 유닛은 일로 설정된다.', () => {});
 
