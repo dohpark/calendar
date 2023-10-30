@@ -2,13 +2,12 @@
 
 import { useMainCalendar } from '@/store/mainCalendar';
 import DateButton from '@/components/common/DateButton';
-import Layer from '@/components/layouts/Layer';
 import { countMonthDays } from '@/utils/calendar';
 
 export default function MonthCalendar() {
   const { selectedDate } = useMainCalendar();
 
-  const countDays = () => {
+  const countWeeks = () => {
     const target = new Date(selectedDate);
 
     target.setDate(1);
@@ -16,15 +15,16 @@ export default function MonthCalendar() {
 
     const currentMonthDaysCount = countMonthDays(target);
 
-    return Math.ceil((currentMonthDaysCount + lastMonthDaysofFirstWeekCount) / 7) * 7;
+    return Math.ceil((currentMonthDaysCount + lastMonthDaysofFirstWeekCount) / 7);
   };
 
-  const selectedMonthDateArray = Array.from({ length: countDays() }, (_, index) => {
+  const countDays = () => countWeeks() * 7;
+
+  const selectedMonthDateArray = Array.from({ length: countDays() }, (_, count) => {
     const targetDate = new Date(selectedDate);
     targetDate.setDate(1);
-    const day = targetDate.getDay();
-
-    targetDate.setDate(targetDate.getDate() - day + index);
+    const days = targetDate.getDay();
+    targetDate.setDate(targetDate.getDate() - days + count);
     return [targetDate.getFullYear(), targetDate.getMonth() + 1, targetDate.getDate()];
   });
 
@@ -41,6 +41,14 @@ export default function MonthCalendar() {
     return 'text-gray-800';
   };
 
+  const getGridRows = (row: number) => {
+    if (row === 4) return 'grid-rows-4';
+    if (row === 5) return 'grid-rows-5';
+    if (row === 6) return 'grid-rows-6';
+    if (row === 7) return 'grid-rows-7';
+    return 'grid-rows-8';
+  };
+
   return (
     <>
       <div className="grid grid-cols-7 text-xs text-center text-gray-500">
@@ -50,13 +58,18 @@ export default function MonthCalendar() {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 text-xs text-center">
+      <div className={`grid grid-cols-7 ${getGridRows(countWeeks())} text-xs text-center overflow-hidden`}>
         {selectedMonthDateArray.map(([year, month, date]) => (
-          <Layer
-            gap="0"
+          <div
+            role="gridcell"
+            tabIndex={0}
+            className="border-l border-b cursor-pointer grid grid-rows-auto-start gap-0 auto-rows-min"
             key={`${year}-${month}-${date}`}
             aria-label={`${year}-${month}-${date}`}
-            classExtend={['border-l', 'border-b', 'cursor-pointer', 'grid-rows-auto-start']}
+            onClick={() => console.log(`${year}-${month}-${date}`)}
+            onKeyDown={(e) => {
+              if (e.code === 'Space') console.log(`${year}-${month}-${date}`);
+            }}
           >
             <div className="pt-1">
               <DateButton
@@ -64,13 +77,16 @@ export default function MonthCalendar() {
                 month={month}
                 date={date}
                 classExtend={[date !== 1 ? 'w-6' : '!w-auto', getDateButtonCss(year, month, date)]}
-                onClick={() => console.log(date)}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.stopPropagation();
+                  console.log(date);
+                }}
               >
                 {date === 1 ? `${month}월 ${date}일` : date}
               </DateButton>
             </div>
             <div />
-          </Layer>
+          </div>
         ))}
       </div>
     </>
