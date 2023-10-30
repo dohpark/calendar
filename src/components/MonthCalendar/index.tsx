@@ -16,7 +16,7 @@ interface SnapShot {
 }
 
 export default function MonthCalendar() {
-  const { selectedDate } = useMainCalendar();
+  const { selectedDate, actions } = useMainCalendar();
   const { openModal, ModalPortal } = useModal();
 
   const dateContainerRef = useRef<HTMLDivElement>(null);
@@ -140,7 +140,8 @@ export default function MonthCalendar() {
                 classExtend={[date !== 1 ? 'w-6' : '!w-auto', getDateButtonCss(year, month, date)]}
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation();
-                  console.log(date);
+                  actions.setCalendarUnit('D');
+                  actions.setSelectedDate(new Date(year, month - 1, date));
                 }}
               >
                 {date === 1 ? `${month}월 ${date}일` : date}
