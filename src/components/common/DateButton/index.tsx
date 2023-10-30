@@ -6,7 +6,6 @@ interface DateButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   date: number;
   children: React.ReactNode;
   classExtend?: string[];
-  onClick: () => void;
 }
 
 export default function DateButton({

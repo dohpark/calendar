@@ -1,14 +1,13 @@
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   classExtend?: string[];
-  onClick: () => void;
 }
 
-export default function IconButton({ children, classExtend, onClick, ...props }: IconButtonProps) {
+export default function IconButton({ children, classExtend, ...props }: IconButtonProps) {
   const classExtension = classExtend ? classExtend.join(' ') : '';
 
   return (
-    <button {...props} type="button" className={`hover:bg-zinc-100 rounded-full ${classExtension}`} onClick={onClick}>
+    <button {...props} type="button" className={`hover:bg-zinc-100 rounded-full ${classExtension}`}>
       {children}
     </button>
   );
