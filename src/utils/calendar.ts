@@ -21,6 +21,7 @@ export const getDisplayedDateWeekUnit = (date: Date) => {
 
 export const countMonthDays = (date: Date) => {
   const targetDate = new Date(date);
+  targetDate.setDate(1);
   targetDate.setMonth(targetDate.getMonth() + 1);
   targetDate.setDate(0);
 
