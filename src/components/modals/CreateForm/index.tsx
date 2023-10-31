@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Layer from '@/components/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
@@ -23,6 +23,7 @@ function LayerItem({ children, Icon }: LayerItemProps) {
 
 export default function CreateForm({ style }: any) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [type, setType] = useState<'event' | 'todo'>('event');
 
   return (
     <div style={style} role="dialog" className="absolute w-[400px] rounded z-20 bg-white shadow-box-2 select-none">
@@ -36,12 +37,35 @@ export default function CreateForm({ style }: any) {
           <input placeholder="제목" className="border-b-2 w-full p-1 text-lg outline-none" />
         </LayerItem>
         <LayerItem>
-          <TextButton type="button" classExtend={['text-sm', 'px-3', 'py-1', 'mr-4']}>
+          <input
+            className="hidden peer/event"
+            type="radio"
+            id="event"
+            value="event"
+            checked={type === 'event'}
+            onChange={() => setType('event')}
+          />
+          <label
+            className="text-sm px-3 py-1 mr-2 leading-7 cursor-pointer rounded hover:bg-zinc-100 peer-checked/event:bg-blue-100 peer-checked/event:text-blue-500"
+            htmlFor="event"
+          >
             이벤트
-          </TextButton>
-          <TextButton type="button" classExtend={['text-sm', 'px-3', 'py-1']}>
+          </label>
+
+          <input
+            className="hidden peer/todo"
+            type="radio"
+            id="todo"
+            value="todo"
+            checked={type === 'todo'}
+            onChange={() => setType('todo')}
+          />
+          <label
+            className="text-sm px-3 py-1 mr-4 leading-7 cursor-pointer rounded hover:bg-zinc-100 peer-checked/todo:bg-blue-100 peer-checked/todo:text-blue-500"
+            htmlFor="todo"
+          >
             할 일
-          </TextButton>
+          </label>
         </LayerItem>
         <LayerItem Icon={Time}>
           <div className="self-center text-sm">
