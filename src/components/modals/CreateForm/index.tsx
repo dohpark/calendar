@@ -5,6 +5,7 @@ import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
 import TextButton from '@/components/common/TextButton';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
+import { CalendarCreateType } from '@/types/calendar';
 
 interface LayerItemProps {
   Icon?: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -30,7 +31,8 @@ function LayerItem({ children, Icon }: LayerItemProps) {
 
 export default function CreateForm({ style = {}, dragStartDate, dragEndDate }: CreateFormProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [type, setType] = useState<'event' | 'todo'>('event');
+  const [type, setType] = useState<CalendarCreateType>('event');
+  const [isAllDay, setIsAllDay] = useState(false);
 
   const startDate = dragStartDate < dragEndDate ? dragStartDate : dragEndDate;
   const endDate = dragStartDate > dragEndDate ? dragStartDate : dragEndDate;
@@ -78,15 +80,37 @@ export default function CreateForm({ style = {}, dragStartDate, dragEndDate }: C
           </label>
         </LayerItem>
         <LayerItem Icon={Time}>
-          <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
-            <span>
-              {startDate.getMonth() + 1}월 {startDate.getDate()}일 ({DAYS_OF_THE_WEEK[startDate.getDay()]})
-            </span>
-            <span className="px-2">-</span>
-            <span>
-              {endDate.getMonth() + 1}월 {endDate.getDate()}일 ({DAYS_OF_THE_WEEK[endDate.getDay()]})
-            </span>
-          </div>
+          {type === 'event' ? (
+            <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
+              <span>
+                {startDate.getMonth() + 1}월 {startDate.getDate()}일 ({DAYS_OF_THE_WEEK[startDate.getDay()]})
+              </span>
+              <span className="px-2">-</span>
+              <span>
+                {endDate.getMonth() + 1}월 {endDate.getDate()}일 ({DAYS_OF_THE_WEEK[endDate.getDay()]})
+              </span>
+            </div>
+          ) : null}
+          {type === 'todo' ? (
+            <div className="self-center text-sm">
+              <div role="presentation" aria-label="create form selected date">
+                <span>
+                  {startDate.getMonth() + 1}월 {startDate.getDate()}일 ({DAYS_OF_THE_WEEK[startDate.getDay()]})
+                </span>
+                {isAllDay ? <span className="ml-3">오전 12:00</span> : null}
+              </div>
+              <div className="flex items-center mt-2">
+                <input
+                  type="checkbox"
+                  id="allday"
+                  className="w-4 h-4 mr-2"
+                  checked={isAllDay}
+                  onChange={() => setIsAllDay((state) => !state)}
+                />
+                <label htmlFor="allday">종일</label>
+              </div>
+            </div>
+          ) : null}
         </LayerItem>
         <LayerItem Icon={Text}>
           <textarea
