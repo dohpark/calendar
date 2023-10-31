@@ -5,6 +5,7 @@ import { useMainCalendar } from '@/store/mainCalendar';
 import DateButton from '@/components/common/DateButton';
 import { countMonthDays } from '@/utils/calendar';
 import useModal from '@/hooks/useModal';
+import CreateForm from '@/components/modals/CreateForm';
 
 interface SnapShot {
   width: number;
@@ -191,34 +192,7 @@ export default function MonthCalendar() {
         ))}
       </div>
       <ModalPortal>
-        <div
-          role="dialog"
-          className="absolute w-[400px] rounded p-6 z-20 bg-white shadow-box-2"
-          style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }}
-        >
-          <h2 className="mb-4 text-base font-normal">테스트</h2>
-          <input
-            className="w-full py-1 px-2 border border-grey3 rounded mb-6 text-sm"
-            onInput={() => console.log('input')}
-            placeholder="테스트"
-          />
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => console.log('click')}
-              className="bg-white border border-blue2 text-blue2 text-xs mr-3 hover:bg-blue0 active:translate-y-[1px]"
-            >
-              확인
-            </button>
-            <button
-              type="button"
-              onClick={() => console.log('click')}
-              className="bg-white border border-blue2 text-blue2 text-xs hover:bg-blue0 active:translate-y-[1px]"
-            >
-              취소
-            </button>
-          </div>
-        </div>
+        <CreateForm style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }} />
       </ModalPortal>
     </>
   );

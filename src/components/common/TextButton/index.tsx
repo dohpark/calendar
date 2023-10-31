@@ -1,14 +1,13 @@
 interface TextButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   classExtend?: string[];
-  onClick: () => void;
 }
 
-export default function TextButton({ children, classExtend, onClick, ...props }: TextButtonProps) {
+export default function TextButton({ children, classExtend, ...props }: TextButtonProps) {
   const classExtension = classExtend ? classExtend.join(' ') : '';
 
   return (
-    <button {...props} type="button" className={`border rounded hover:bg-zinc-100 ${classExtension}`} onClick={onClick}>
+    <button {...props} type="button" className={`border rounded hover:bg-zinc-100 ${classExtension}`}>
       {children}
     </button>
   );
