@@ -6,6 +6,7 @@ import DateButton from '@/components/common/DateButton';
 import { countMonthDays } from '@/utils/calendar';
 import useModal from '@/hooks/useModal';
 import CreateForm from '@/components/modals/CreateForm';
+import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 
 interface SnapShot {
   width: number;
@@ -32,8 +33,8 @@ export default function MonthCalendar() {
   const snapshotRef = useRef<SnapShot>(InitialSnapshot);
 
   const [mouseDown, setMouseDown] = useState(false);
-  const [dragStartDateIndex, setDragStartDateIndex] = useState(-1);
-  const [dragEndDateIndex, setDragEndDateIndex] = useState(-1);
+  const [dragStartDateIndex, setDragStartDateIndex] = useState(0);
+  const [dragEndDateIndex, setDragEndDateIndex] = useState(0);
 
   const resetDrag = () => {
     if (!dateContainerRef.current) return;
@@ -43,23 +44,6 @@ export default function MonthCalendar() {
   };
 
   const { openModal, ModalPortal } = useModal({ reset: resetDrag });
-
-  useEffect(() => {
-    if (!dateContainerRef.current) return;
-    if (!mouseDown) return;
-
-    const node = Array.from(dateContainerRef.current.children)[dragStartDateIndex] as HTMLDivElement;
-    snapshotRef.current = {
-      width: node.offsetWidth,
-      height: node.offsetHeight,
-      top: node.getBoundingClientRect().top,
-      bottom: node.getBoundingClientRect().bottom,
-      left: node.getBoundingClientRect().left,
-      right: node.getBoundingClientRect().right,
-    };
-
-    node.classList.add('bg-blue-50');
-  }, [dragStartDateIndex, mouseDown]);
 
   useEffect(() => {
     if (!dateContainerRef.current) return;
@@ -84,7 +68,7 @@ export default function MonthCalendar() {
       if (smallIndex <= index && index <= largeIndex) target.classList.add('bg-blue-50');
       else target.classList.remove('bg-blue-50');
     });
-  }, [dragEndDateIndex]);
+  }, [dragEndDateIndex, mouseDown]);
 
   const countWeeks = () => {
     const target = new Date(selectedDate);
@@ -106,6 +90,18 @@ export default function MonthCalendar() {
     targetDate.setDate(targetDate.getDate() - days + count);
     return [targetDate.getFullYear(), targetDate.getMonth() + 1, targetDate.getDate()];
   });
+
+  const createFormSelectedStartDate = new Date(
+    selectedMonthDateArray[dragStartDateIndex][0],
+    selectedMonthDateArray[dragStartDateIndex][1] - 1,
+    selectedMonthDateArray[dragStartDateIndex][2],
+  );
+
+  const createFormSelectedEndDate = new Date(
+    selectedMonthDateArray[dragEndDateIndex][0],
+    selectedMonthDateArray[dragEndDateIndex][1] - 1,
+    selectedMonthDateArray[dragEndDateIndex][2],
+  );
 
   const getDateButtonCss = (year: number, month: number, date: number) => {
     const today = new Date();
@@ -140,7 +136,7 @@ export default function MonthCalendar() {
   return (
     <>
       <div className="grid grid-cols-7 text-xs text-center text-gray-500">
-        {['일', '월', '화', '수', '목', '금', '토'].map((value) => (
+        {DAYS_OF_THE_WEEK.map((value) => (
           <div key={value} className="border-l pt-2">
             {value}
           </div>
@@ -159,6 +155,7 @@ export default function MonthCalendar() {
             aria-label={`${year}-${month}-${date}-cell`}
             onMouseDown={() => {
               setDragStartDateIndex(index);
+              setDragEndDateIndex(index);
               setMouseDown(true);
             }}
             onMouseEnter={() => {
@@ -192,7 +189,11 @@ export default function MonthCalendar() {
         ))}
       </div>
       <ModalPortal>
-        <CreateForm style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }} />
+        <CreateForm
+          style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }}
+          dragStartDate={createFormSelectedStartDate}
+          dragEndDate={createFormSelectedEndDate}
+        />
       </ModalPortal>
     </>
   );

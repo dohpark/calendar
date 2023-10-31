@@ -4,10 +4,17 @@ import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
 import TextButton from '@/components/common/TextButton';
+import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 
 interface LayerItemProps {
   Icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   children: React.ReactNode;
+}
+
+interface CreateFormProps {
+  style?: object;
+  dragStartDate: Date;
+  dragEndDate: Date;
 }
 
 function LayerItem({ children, Icon }: LayerItemProps) {
@@ -21,9 +28,12 @@ function LayerItem({ children, Icon }: LayerItemProps) {
   );
 }
 
-export default function CreateForm({ style }: any) {
+export default function CreateForm({ style = {}, dragStartDate, dragEndDate }: CreateFormProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [type, setType] = useState<'event' | 'todo'>('event');
+
+  const startDate = dragStartDate < dragEndDate ? dragStartDate : dragEndDate;
+  const endDate = dragStartDate > dragEndDate ? dragStartDate : dragEndDate;
 
   return (
     <div style={style} role="dialog" className="absolute w-[400px] rounded z-20 bg-white shadow-box-2 select-none">
@@ -68,10 +78,14 @@ export default function CreateForm({ style }: any) {
           </label>
         </LayerItem>
         <LayerItem Icon={Time}>
-          <div className="self-center text-sm">
-            <span>10월 1일 (수)</span>
+          <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
+            <span>
+              {startDate.getMonth() + 1}월 {startDate.getDate()}일 ({DAYS_OF_THE_WEEK[startDate.getDay()]})
+            </span>
             <span className="px-2">-</span>
-            <span>10월 2일 (수)</span>
+            <span>
+              {endDate.getMonth() + 1}월 {endDate.getDate()}일 ({DAYS_OF_THE_WEEK[endDate.getDay()]})
+            </span>
           </div>
         </LayerItem>
         <LayerItem Icon={Text}>
