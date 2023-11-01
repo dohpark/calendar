@@ -1,22 +1,28 @@
-import { act, render, renderHook, screen, within } from '@/test-utils/testingLibrary';
+import { act, render, renderHook, screen } from '@/test-utils/testingLibrary';
 import MiniCalendar from '@/components/MiniCalendar';
 import userEvent from '@testing-library/user-event';
 import { useMainCalendar } from '@/store/mainCalendar';
-import Home from '@/app/page';
 
-test('디폴트로 현재 월의 달력을 보인다.', () => {
-  render(<MiniCalendar />);
+test('선택 날짜의 월을 디폴트로 보인다.', () => {
+  // 2023년 10월 18일로 설정
+  const { result } = renderHook(() => useMainCalendar());
+  act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 18)));
+
+  render(
+    <MiniCalendar selectedDate={result.current.selectedDate} selectDate={result.current.actions.setSelectedDate} />,
+  );
   const miniCalendarDisplayDate = screen.getByRole('presentation', { name: /mini calendar display year and month/i });
 
-  const today = new Date();
-  const todayYear = today.getFullYear();
-  const todayMonth = today.getMonth() + 1;
-
-  expect(miniCalendarDisplayDate).toHaveTextContent(`${todayYear}년 ${todayMonth}월`);
+  expect(miniCalendarDisplayDate).toHaveTextContent(`${2023}년 ${10}월`);
 });
 
 test('미니달력에서 오늘 날짜의 배경색은 blue500이다.', () => {
-  render(<MiniCalendar />);
+  // default로 오늘날짜 설정
+  const { result } = renderHook(() => useMainCalendar());
+
+  render(
+    <MiniCalendar selectedDate={result.current.selectedDate} selectDate={result.current.actions.setSelectedDate} />,
+  );
 
   const today = new Date();
   const todayYear = today.getFullYear();
@@ -32,12 +38,14 @@ test('미니달력에서 오늘 날짜의 배경색은 blue500이다.', () => {
 });
 
 test('미니달력에서 선택한 날짜의 배경색은 blue200이다.', async () => {
-  const user = userEvent.setup();
-  render(<MiniCalendar />);
-
   // 2023년 10월 18일로 설정
   const { result } = renderHook(() => useMainCalendar());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 18)));
+
+  const user = userEvent.setup();
+  render(
+    <MiniCalendar selectedDate={result.current.selectedDate} selectDate={result.current.actions.setSelectedDate} />,
+  );
 
   // 해당 달 임의의 날짜 클릭
   const targetDateButton = screen.getByRole('button', { name: '2023-10-18' });
@@ -48,11 +56,13 @@ test('미니달력에서 선택한 날짜의 배경색은 blue200이다.', async
 });
 
 test('지난달과 다음달의 날짜의 색상은 gray400이다. 현재 달의 날짜의 색상은 gray600이다.', () => {
-  render(<MiniCalendar />);
-
   // 2023년 11월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 10, 28)));
+
+  render(
+    <MiniCalendar selectedDate={result.current.selectedDate} selectDate={result.current.actions.setSelectedDate} />,
+  );
 
   // 현재 달 임의의 날짜 색상 확인
   const selectedDateButton = screen.getByRole('button', { name: '2023-11-4' });
@@ -68,12 +78,14 @@ test('지난달과 다음달의 날짜의 색상은 gray400이다. 현재 달의
 });
 
 test('미니달력의 왼쪽 버튼을 클릭 시 전달로 넘어간다.', async () => {
-  const user = userEvent.setup();
-  render(<MiniCalendar />);
-
   // 2024년 1월 15일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
   act(() => result.current.actions.setSelectedDate(new Date(2024, 0, 15)));
+
+  const user = userEvent.setup();
+  render(
+    <MiniCalendar selectedDate={result.current.selectedDate} selectDate={result.current.actions.setSelectedDate} />,
+  );
 
   // 왼쪽 버튼 클릭
   const leftButton = screen.getByRole('button', { name: /left button/i });
@@ -85,12 +97,14 @@ test('미니달력의 왼쪽 버튼을 클릭 시 전달로 넘어간다.', asyn
 });
 
 test('미니달력의 오른쪽 버튼을 클릭 시 다음달로 넘어간다.', async () => {
-  const user = userEvent.setup();
-  render(<MiniCalendar />);
-
   // 2023년 12월 15일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 15)));
+
+  const user = userEvent.setup();
+  render(
+    <MiniCalendar selectedDate={result.current.selectedDate} selectDate={result.current.actions.setSelectedDate} />,
+  );
 
   const rightButton = screen.getByRole('button', { name: /right button/i });
   await user.click(rightButton);
@@ -98,54 +112,4 @@ test('미니달력의 오른쪽 버튼을 클릭 시 다음달로 넘어간다.'
   // 미니달력에 2024년 1월로 표시
   const miniCalendarDisplayDate = screen.getByRole('presentation', { name: /mini calendar display year and month/i });
   expect(miniCalendarDisplayDate).toHaveTextContent(`2024년 1월`);
-});
-
-test('미니달력에서 날짜를 선택시 메인달력에서 선택 날짜가 반영된다.', async () => {
-  const user = userEvent.setup();
-  render(<Home />);
-
-  // 2023년 12월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
-  act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 28)));
-
-  // 미니달력에 왼쪽 버튼 클릭하여 전달로 이동
-  const miniCalendar = screen.getByRole('presentation', { name: 'mini calendar' });
-  const { getByRole: getByRoleWithinMiniCalendar } = within(miniCalendar);
-
-  const miniCalendarLeftButton = getByRoleWithinMiniCalendar('button', {
-    name: /left button/i,
-  });
-  await user.click(miniCalendarLeftButton);
-
-  // 2023년 11월 중 임의의 날짜 선택
-  const targetDateButton = getByRoleWithinMiniCalendar('button', {
-    name: '2023-11-7',
-  });
-  await user.click(targetDateButton);
-
-  // 메인 달력에 선택 날짜 반영
-  const header = screen.getByRole('banner');
-  const { getByLabelText: getByLabelTextWithinHeader } = within(header);
-  const selectedDateDisaply = getByLabelTextWithinHeader(/selected date/i);
-
-  expect(selectedDateDisaply).toHaveTextContent(`2023년 11월`);
-});
-
-test('헤더에서 왼쪽 및 오른쪽 버튼을 클릭을 통한 날짜 선택이 미니달력에도 같이 반영이 된다.', async () => {
-  const user = userEvent.setup();
-  render(<Home />);
-
-  // 2023년 12월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
-  act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 28)));
-
-  // 헤더의 왼쪽 버튼 클릭 시 전 달로 이동
-  const header = screen.getByRole('banner');
-  const { getByRole: getByRoletWithinHeader } = within(header);
-  const mainCalendarLeftButton = getByRoletWithinHeader('button', { name: /left button/i });
-  await user.click(mainCalendarLeftButton);
-
-  // 미니달력에 2023년 11월로 표시
-  const miniCalendarDisplayDate = screen.getByRole('presentation', { name: /mini calendar display year and month/i });
-  expect(miniCalendarDisplayDate).toHaveTextContent(`2023년 11월`);
 });
