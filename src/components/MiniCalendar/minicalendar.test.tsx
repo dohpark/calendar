@@ -113,3 +113,24 @@ test('미니달력의 오른쪽 버튼을 클릭 시 다음달로 넘어간다.'
   const miniCalendarDisplayDate = screen.getByRole('presentation', { name: /mini calendar display year and month/i });
   expect(miniCalendarDisplayDate).toHaveTextContent(`2024년 1월`);
 });
+
+test('미니달력에 filter callback 함수를 주어 disable 할 날짜들을 정할 수 있다.', () => {
+  // 2023년 12월 15일로 날짜 설정
+  const { result } = renderHook(() => useMainCalendar());
+  act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 15)));
+
+  // 2023년 12월 15일 이후의 날들은 disable
+  const disabledFilterCallback = (date: Date) => date > new Date(2023, 11, 15);
+
+  render(
+    <MiniCalendar
+      selectedDate={result.current.selectedDate}
+      selectDate={result.current.actions.setSelectedDate}
+      disabledFilterCallback={disabledFilterCallback}
+    />,
+  );
+
+  // 2023년 12월 20일 버튼은 disable 되어 있다.
+  const disabledButton = screen.getByRole('button', { name: /2023-12-20/i });
+  expect(disabledButton).toBeDisabled();
+});

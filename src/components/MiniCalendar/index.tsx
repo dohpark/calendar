@@ -12,6 +12,7 @@ interface MiniCalendarProps {
   classExtend?: string[];
   selectedDate: Date;
   selectDate: (date: Date) => void;
+  disabledFilterCallback?: (date: Date) => boolean;
 }
 
 /**
@@ -27,8 +28,15 @@ interface MiniCalendarProps {
  *
  * selectedDate와 displayDate의 연 월이 같지 않으면 displayDate가 selectedDate의 연 월에 맞춘다.
  *
+ * disabledFilterCallback을 통해 disable 해야할 버튼들을 filter한다.
+ *
  */
-export default function MiniCalendar({ classExtend, selectedDate, selectDate }: MiniCalendarProps) {
+export default function MiniCalendar({
+  classExtend,
+  selectedDate,
+  selectDate,
+  disabledFilterCallback,
+}: MiniCalendarProps) {
   const today = new Date();
   const [displayDate, setDisplayDate] = useState(new Date(selectedDate));
 
@@ -92,6 +100,10 @@ export default function MiniCalendar({ classExtend, selectedDate, selectDate }: 
     return 'text-gray-600';
   };
 
+  const checkDisabled = (date: Date) => {
+    if (!disabledFilterCallback) return false;
+    return disabledFilterCallback(date);
+  };
   const classExtension = classExtend ? classExtend.join(' ') : '';
   return (
     <div className={`${classExtension}`} role="presentation" aria-label="mini calendar">
@@ -139,8 +151,14 @@ export default function MiniCalendar({ classExtend, selectedDate, selectDate }: 
               year={year}
               month={month}
               date={date}
-              classExtend={['justify-self-center', getDateButtonCss(year, month, date)]}
+              classExtend={[
+                'justify-self-center',
+                getDateButtonCss(year, month, date),
+                'disabled:cursor-not-allowed',
+                'disabled:text-gray-200',
+              ]}
               onClick={() => selectDate(new Date(year, month - 1, date))}
+              disabled={checkDisabled(new Date(year, month - 1, date))}
             >
               {date}
             </DateButton>
