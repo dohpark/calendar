@@ -6,7 +6,7 @@ interface ListBoxProps<T extends DefaultItem> {
   items: T[];
   sourceName: string;
   ItemComponent: (props: any) => JSX.Element;
-  onClick?: () => void;
+  onClick?: (...args: any[]) => any;
   classExtend?: string[];
 }
 

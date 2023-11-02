@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import Layer from '@/components/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
@@ -6,16 +6,39 @@ import Close from '@public/svg/close.svg';
 import TextButton from '@/components/common/TextButton';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 import { CalendarCreateType } from '@/types/calendar';
+import MiniCalendar from '@/components/MiniCalendar';
+import OutsideDetecter from '@/hooks/useOutsideDetector';
+import { useMainCalendar } from '@/store/mainCalendar';
+import ListBox from '@/components/common/ListBox';
+import { createTimeItems, getTimeDisplay } from '@/utils/calendar';
+import TimeListItem from './TimeListItem';
 
 interface LayerItemProps {
   Icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   children: React.ReactNode;
 }
 
+interface DragState {
+  start: Date;
+  end: Date;
+}
+
 interface CreateFormProps {
   style?: object;
-  dragStartDate: Date;
-  dragEndDate: Date;
+  dragDate: DragState;
+  setDragDate: Dispatch<SetStateAction<DragState>>;
+}
+
+interface CalendarInputProps {
+  date: Date;
+  label: string;
+  setDate: (date: Date) => void;
+  disabledFilterCallback?: (date: Date) => boolean;
+}
+
+interface TimeInputProps {
+  date: Date;
+  setTime: (hour: number, minute: number) => void;
 }
 
 function LayerItem({ children, Icon }: LayerItemProps) {
@@ -29,13 +52,108 @@ function LayerItem({ children, Icon }: LayerItemProps) {
   );
 }
 
-export default function CreateForm({ style = {}, dragStartDate, dragEndDate }: CreateFormProps) {
+function CalendarInput({ date, setDate, label, disabledFilterCallback }: CalendarInputProps) {
+  const [isFocus, setIsFocus] = useState(false);
+  return (
+    <>
+      <input
+        aria-label={label}
+        className="w-24 outline-none rounded px-1 py-1 hover:bg-zinc-100 cursor-pointer"
+        value={`${date.getMonth() + 1}월 ${date.getDate()}일 (${DAYS_OF_THE_WEEK[date.getDay()]})`}
+        onClick={() => {
+          setIsFocus((state) => !state);
+        }}
+        readOnly
+      />
+      {isFocus ? (
+        <OutsideDetecter callback={() => setIsFocus(false)} classExtend={['absolute', 'top-8', 'left-0']}>
+          <MiniCalendar
+            selectDate={setDate}
+            selectedDate={date}
+            disabledFilterCallback={disabledFilterCallback}
+            classExtend={['bg-white', 'w-52', 'shadow-box-2', 'p-2', 'rounded']}
+          />
+        </OutsideDetecter>
+      ) : null}
+    </>
+  );
+}
+
+function TimeInput({ date, setTime }: TimeInputProps) {
+  const [isFocus, setIsFocus] = useState(false);
+
+  return (
+    <>
+      <input
+        aria-label="start time"
+        className="w-20 outline-none rounded px-1 py-1 hover:bg-zinc-100 cursor-pointer"
+        value={getTimeDisplay(date.getHours(), date.getMinutes())}
+        onClick={() => {
+          setIsFocus((state) => !state);
+        }}
+        readOnly
+      />
+      {isFocus ? (
+        <OutsideDetecter callback={() => setIsFocus(false)} classExtend={['absolute', 'top-8', 'left-0']}>
+          <ListBox<{ key: string; hour: number; minute: number }>
+            classExtend={['w-40', 'h-44', 'overflow-y-auto']}
+            ItemComponent={TimeListItem}
+            onClick={(hour: number, minute: number) => setTime(hour, minute)}
+            sourceName="time"
+            items={createTimeItems()}
+          />
+        </OutsideDetecter>
+      ) : null}
+    </>
+  );
+}
+
+export default function CreateForm({ style = {}, dragDate, setDragDate }: CreateFormProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [type, setType] = useState<CalendarCreateType>('event');
-  const [isAllDay, setIsAllDay] = useState(false);
+  const [isAllDay, setIsAllDay] = useState(true);
+  const [startDate, setStartDate] = useState(dragDate.start < dragDate.end ? dragDate.start : dragDate.end);
+  const [endDate, setEndDate] = useState(dragDate.start > dragDate.end ? dragDate.start : dragDate.end);
 
-  const startDate = dragStartDate < dragEndDate ? dragStartDate : dragEndDate;
-  const endDate = dragStartDate > dragEndDate ? dragStartDate : dragEndDate;
+  const { actions } = useMainCalendar();
+
+  const setEventStartDate = (targetDate: Date) => {
+    setStartDate(targetDate);
+    if (targetDate.getFullYear() !== startDate.getFullYear() || targetDate.getMonth() !== startDate.getMonth()) {
+      actions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
+    }
+    setDragDate({ start: targetDate, end: endDate });
+  };
+
+  const setEventEndDate = (targetDate: Date) => {
+    setEndDate(targetDate);
+    setDragDate((prevDate) => ({ ...prevDate, end: targetDate }));
+  };
+
+  const setTodoDate = (targetDate: Date) => {
+    setStartDate(targetDate);
+    setEndDate(targetDate);
+    setDragDate({ start: targetDate, end: targetDate });
+    if (targetDate.getFullYear() !== startDate.getFullYear() || targetDate.getMonth() !== startDate.getMonth()) {
+      actions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
+    }
+  };
+
+  const setTodoTime = (hour: number, minute: number) => {
+    const targetDate = new Date(startDate);
+    targetDate.setHours(hour, minute);
+    setStartDate(targetDate);
+  };
+
+  const startDisabledFilterCallback = (date: Date) => {
+    if (date > endDate) return true;
+    return false;
+  };
+
+  const endDisabledFilterCallback = (date: Date) => {
+    if (date < startDate) return true;
+    return false;
+  };
 
   return (
     <div style={style} role="dialog" className="absolute w-[400px] rounded z-20 bg-white shadow-box-2 select-none">
@@ -82,22 +200,36 @@ export default function CreateForm({ style = {}, dragStartDate, dragEndDate }: C
         <LayerItem Icon={Time}>
           {type === 'event' ? (
             <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
-              <span>
-                {startDate.getMonth() + 1}월 {startDate.getDate()}일 ({DAYS_OF_THE_WEEK[startDate.getDay()]})
+              <span className="relative" aria-label="event start date">
+                <CalendarInput
+                  label="start date"
+                  date={startDate}
+                  setDate={setEventStartDate}
+                  disabledFilterCallback={startDisabledFilterCallback}
+                />
               </span>
               <span className="px-2">-</span>
-              <span>
-                {endDate.getMonth() + 1}월 {endDate.getDate()}일 ({DAYS_OF_THE_WEEK[endDate.getDay()]})
+              <span className="relative" aria-label="event end date">
+                <CalendarInput
+                  label="end date"
+                  date={endDate}
+                  setDate={setEventEndDate}
+                  disabledFilterCallback={endDisabledFilterCallback}
+                />
               </span>
             </div>
           ) : null}
           {type === 'todo' ? (
             <div className="self-center text-sm">
               <div role="presentation" aria-label="create form selected date">
-                <span>
-                  {startDate.getMonth() + 1}월 {startDate.getDate()}일 ({DAYS_OF_THE_WEEK[startDate.getDay()]})
+                <span className="relative" aria-label="todo start date">
+                  <CalendarInput label="start date" date={startDate} setDate={setTodoDate} />
                 </span>
-                {isAllDay ? <span className="ml-3">오전 12:00</span> : null}
+                {!isAllDay ? (
+                  <span className="ml-3 relative">
+                    <TimeInput date={startDate} setTime={setTodoTime} />
+                  </span>
+                ) : null}
               </div>
               <div className="flex items-center mt-2">
                 <input

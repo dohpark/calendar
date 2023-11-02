@@ -33,7 +33,7 @@ const useModal = ({ reset }: UseModalProps) => {
     return null;
   }
 
-  return { openModal, closeModal, ModalPortal };
+  return { openModal, closeModal, ModalPortal, modalOpen };
 };
 
 export default useModal;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMainCalendar } from '@/store/mainCalendar';
 import DateButton from '@/components/common/DateButton';
 import { countMonthDays } from '@/utils/calendar';
@@ -15,6 +15,11 @@ interface SnapShot {
   bottom: number;
   left: number;
   right: number;
+}
+
+interface DragState {
+  start: Date;
+  end: Date;
 }
 
 const InitialSnapshot = {
@@ -33,43 +38,12 @@ export default function MonthCalendar() {
   const snapshotRef = useRef<SnapShot>(InitialSnapshot);
 
   const [mouseDown, setMouseDown] = useState(false);
-  const [dragStartDateIndex, setDragStartDateIndex] = useState(0);
-  const [dragEndDateIndex, setDragEndDateIndex] = useState(0);
+  const [dragDate, setDragDate] = useState<DragState>({
+    start: new Date(),
+    end: new Date(),
+  });
 
-  const resetDrag = () => {
-    if (!dateContainerRef.current) return;
-    Array.from(dateContainerRef.current.children).forEach((target) => {
-      target.classList.remove('bg-blue-50');
-    });
-  };
-
-  const { openModal, ModalPortal } = useModal({ reset: resetDrag });
-
-  useEffect(() => {
-    if (!dateContainerRef.current) return;
-    if (!mouseDown) return;
-
-    const node = Array.from(dateContainerRef.current.children)[dragEndDateIndex] as HTMLDivElement;
-    snapshotRef.current = {
-      width: node.offsetWidth,
-      height: node.offsetHeight,
-      top: node.getBoundingClientRect().top,
-      bottom: node.getBoundingClientRect().bottom,
-      left: node.getBoundingClientRect().left,
-      right: node.getBoundingClientRect().right,
-    };
-
-    let [smallIndex, largeIndex] = [dragStartDateIndex, dragEndDateIndex];
-    if (smallIndex > largeIndex) {
-      [smallIndex, largeIndex] = [largeIndex, smallIndex];
-    }
-
-    Array.from(dateContainerRef.current.children).forEach((target, index) => {
-      if (smallIndex <= index && index <= largeIndex) target.classList.add('bg-blue-50');
-      else target.classList.remove('bg-blue-50');
-    });
-  }, [dragEndDateIndex, mouseDown]);
-
+  // selectedDate의 월 달력에 몇 주 있는지 체크
   const countWeeks = () => {
     const target = new Date(selectedDate);
 
@@ -81,28 +55,61 @@ export default function MonthCalendar() {
     return Math.ceil((currentMonthDaysCount + lastMonthDaysofFirstWeekCount) / 7);
   };
 
+  // selectedDate 월 달력에 며칠이 존재하는지 확인
   const countDays = () => countWeeks() * 7;
 
+  // selectedDate의 월 달력 내의 날짜 생성
   const selectedMonthDateArray = Array.from({ length: countDays() }, (_, count) => {
     const targetDate = new Date(selectedDate);
     targetDate.setDate(1);
     const days = targetDate.getDay();
     targetDate.setDate(targetDate.getDate() - days + count);
-    return [targetDate.getFullYear(), targetDate.getMonth() + 1, targetDate.getDate()];
+    return { year: targetDate.getFullYear(), month: targetDate.getMonth() + 1, date: targetDate.getDate() };
   });
 
-  const createFormSelectedStartDate = new Date(
-    selectedMonthDateArray[dragStartDateIndex][0],
-    selectedMonthDateArray[dragStartDateIndex][1] - 1,
-    selectedMonthDateArray[dragStartDateIndex][2],
-  );
+  // 찾고 있는 날짜가 selectedMonthDateArray의 몇번째 index인지 확인 만약에 없으면 가장 마지막 index 반환
+  const filterDate = (date: { year: number; month: number; date: number }, targetDate: Date) =>
+    date.year === targetDate.getFullYear() &&
+    date.month === targetDate.getMonth() + 1 &&
+    date.date === targetDate.getDate();
+  const getTargetDateIndex = (targetType: Date) => {
+    const index = selectedMonthDateArray.findIndex((date) => filterDate(date, targetType));
+    if (index === -1) return selectedMonthDateArray.length - 1;
+    return index;
+  };
 
-  const createFormSelectedEndDate = new Date(
-    selectedMonthDateArray[dragEndDateIndex][0],
-    selectedMonthDateArray[dragEndDateIndex][1] - 1,
-    selectedMonthDateArray[dragEndDateIndex][2],
-  );
+  // dragDate의 변화 및 mouseDown에 맞춰 snapshotRef 값 변경 및 drag한 날짜들 배경색상 변화
+  useEffect(() => {
+    if (!dateContainerRef.current) return;
+    if (!mouseDown) return;
+    if (!dragDate) return;
 
+    const dragStartIndex = getTargetDateIndex(dragDate.start);
+    const dragEndIndex = getTargetDateIndex(dragDate.end);
+
+    const node = Array.from(dateContainerRef.current.children)[dragStartIndex] as HTMLDivElement;
+    if (!node) return;
+    snapshotRef.current = {
+      width: node.offsetWidth,
+      height: node.offsetHeight,
+      top: node.getBoundingClientRect().top,
+      bottom: node.getBoundingClientRect().bottom,
+      left: node.getBoundingClientRect().left,
+      right: node.getBoundingClientRect().right,
+    };
+
+    let [smallIndex, largeIndex] = [dragStartIndex, dragEndIndex];
+    if (smallIndex > largeIndex) {
+      [smallIndex, largeIndex] = [largeIndex, smallIndex];
+    }
+
+    Array.from(dateContainerRef.current.children).forEach((target, index) => {
+      if (smallIndex <= index && index <= largeIndex) target.classList.add('bg-blue-50');
+      else target.classList.remove('bg-blue-50');
+    });
+  }, [dragDate, mouseDown]);
+
+  // 날짜 버튼 css 다이나믹하게 주기
   const getDateButtonCss = (year: number, month: number, date: number) => {
     const today = new Date();
     const todayYear = today.getFullYear();
@@ -116,22 +123,36 @@ export default function MonthCalendar() {
     return 'text-gray-800';
   };
 
-  const getGridRows = (row: number) => {
-    if (row === 4) return 'grid-rows-4';
-    if (row === 5) return 'grid-rows-5';
-    if (row === 6) return 'grid-rows-6';
-    if (row === 7) return 'grid-rows-7';
-    return 'grid-rows-8';
+  // 모달 생성 위치 계산
+  const calculateModalXPosition = () => ({ left: `${0}px` });
+  const calculateModalYPosition = () => ({ top: `${0}px` });
+
+  // 모달 닫을 시 reset
+  const resetDrag = () => {
+    if (!dateContainerRef.current) return;
+    Array.from(dateContainerRef.current.children).forEach((target) => {
+      target.classList.remove('bg-blue-50');
+    });
+    setMouseDown(false);
   };
 
-  const calculateModalXPosition = () => {
-    if (dragEndDateIndex % 7 < 2) return { left: `${snapshotRef.current.left + snapshotRef.current.width + 16}px` };
-    return { left: `${snapshotRef.current.left - 400 - 16}px` };
-  };
-  const calculateModalYPosition = () => {
-    if (dragEndDateIndex % 7 < 2) return { top: `${snapshotRef.current.top + 16}px` };
-    return { top: `${snapshotRef.current.top}px` };
-  };
+  const { openModal, ModalPortal, modalOpen } = useModal({ reset: resetDrag });
+
+  /**
+   * 상태변화에 따른 모달 컨테이너의 리렌더링 방지
+   */
+  const modal = useMemo(
+    () => (
+      <ModalPortal>
+        <CreateForm
+          style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }}
+          dragDate={dragDate}
+          setDragDate={setDragDate}
+        />
+      </ModalPortal>
+    ),
+    [modalOpen],
+  );
 
   return (
     <>
@@ -142,11 +163,8 @@ export default function MonthCalendar() {
           </div>
         ))}
       </div>
-      <div
-        ref={dateContainerRef}
-        className={`grid grid-cols-7 ${getGridRows(countWeeks())} text-xs text-center overflow-hidden select-none`}
-      >
-        {selectedMonthDateArray.map(([year, month, date], index) => (
+      <div ref={dateContainerRef} className="grid grid-cols-7 text-xs text-center overflow-hidden select-none">
+        {selectedMonthDateArray.map(({ year, month, date }) => (
           <div
             role="gridcell"
             tabIndex={0}
@@ -154,15 +172,13 @@ export default function MonthCalendar() {
             key={`${year}-${month}-${date}`}
             aria-label={`${year}-${month}-${date}-cell`}
             onMouseDown={() => {
-              setDragStartDateIndex(index);
-              setDragEndDateIndex(index);
+              setDragDate({ start: new Date(year, month - 1, date), end: new Date(year, month - 1, date) });
               setMouseDown(true);
             }}
             onMouseEnter={() => {
-              if (mouseDown) setDragEndDateIndex(index);
+              if (mouseDown) setDragDate((state) => ({ ...state, end: new Date(year, month - 1, date) }));
             }}
             onMouseUp={() => {
-              setMouseDown(false);
               openModal();
             }}
             onKeyDown={(e) => {
@@ -188,13 +204,7 @@ export default function MonthCalendar() {
           </div>
         ))}
       </div>
-      <ModalPortal>
-        <CreateForm
-          style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }}
-          dragStartDate={createFormSelectedStartDate}
-          dragEndDate={createFormSelectedEndDate}
-        />
-      </ModalPortal>
+      {modal}
     </>
   );
 }
