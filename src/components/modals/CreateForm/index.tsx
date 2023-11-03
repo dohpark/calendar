@@ -27,6 +27,7 @@ interface CreateFormProps {
   style?: object;
   dragDate: DragState;
   setDragDate: Dispatch<SetStateAction<DragState>>;
+  closeModal: () => void;
 }
 
 interface CalendarInputProps {
@@ -108,7 +109,7 @@ function TimeInput({ date, setTime }: TimeInputProps) {
   );
 }
 
-export default function CreateForm({ style = {}, dragDate, setDragDate }: CreateFormProps) {
+export default function CreateForm({ style = {}, dragDate, setDragDate, closeModal }: CreateFormProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [type, setType] = useState<CalendarCreateType>('event');
   const [isAllDay, setIsAllDay] = useState(true);
@@ -158,7 +159,7 @@ export default function CreateForm({ style = {}, dragDate, setDragDate }: Create
   return (
     <div style={style} role="dialog" className="absolute w-[400px] rounded z-20 bg-white shadow-box-2 select-none">
       <div className="flex flex-row-reverse px-3 py-2 bg-gray-100">
-        <button type="button">
+        <button type="button" onClick={() => closeModal()}>
           <Close height="20" width="20" />
         </button>
       </div>

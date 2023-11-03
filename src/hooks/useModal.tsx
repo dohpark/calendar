@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 interface ModalPortalProps {
@@ -16,10 +16,10 @@ const useModal = ({ reset }: UseModalProps) => {
     setModalOpen(true);
   };
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setModalOpen(false);
     if (reset) reset();
-  };
+  }, []);
 
   function ModalPortal({ children }: ModalPortalProps) {
     if (modalOpen)

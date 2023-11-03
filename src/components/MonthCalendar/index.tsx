@@ -136,7 +136,7 @@ export default function MonthCalendar() {
     setMouseDown(false);
   };
 
-  const { openModal, ModalPortal, modalOpen } = useModal({ reset: resetDrag });
+  const { openModal, ModalPortal, modalOpen, closeModal } = useModal({ reset: resetDrag });
 
   /**
    * 상태변화에 따른 모달 컨테이너의 리렌더링 방지
@@ -148,10 +148,11 @@ export default function MonthCalendar() {
           style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }}
           dragDate={dragDate}
           setDragDate={setDragDate}
+          closeModal={closeModal}
         />
       </ModalPortal>
     ),
-    [modalOpen],
+    [modalOpen, closeModal],
   );
 
   return (
