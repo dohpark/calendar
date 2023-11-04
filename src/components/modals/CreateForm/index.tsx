@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useRef, useState } from 'react';
+import { Dispatch, ForwardedRef, SetStateAction, forwardRef, useRef, useState } from 'react';
 import Layer from '@/components/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
@@ -109,7 +109,10 @@ function TimeInput({ date, setTime }: TimeInputProps) {
   );
 }
 
-export default function CreateForm({ style = {}, dragDate, setDragDate, closeModal }: CreateFormProps) {
+function CreateForm(
+  { style = {}, dragDate, setDragDate, closeModal }: CreateFormProps,
+  ref: ForwardedRef<HTMLDivElement>,
+) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [type, setType] = useState<CalendarCreateType>('event');
   const [isAllDay, setIsAllDay] = useState(true);
@@ -157,7 +160,12 @@ export default function CreateForm({ style = {}, dragDate, setDragDate, closeMod
   };
 
   return (
-    <div style={style} role="dialog" className="absolute w-[400px] rounded z-20 bg-white shadow-box-2 select-none">
+    <div
+      style={style}
+      ref={ref}
+      role="dialog"
+      className="absolute w-[400px] rounded z-20 bg-white shadow-box-2 select-none"
+    >
       <div className="flex flex-row-reverse px-3 py-2 bg-gray-100">
         <button type="button" onClick={() => closeModal()}>
           <Close height="20" width="20" />
@@ -270,3 +278,5 @@ export default function CreateForm({ style = {}, dragDate, setDragDate, closeMod
     </div>
   );
 }
+
+export default forwardRef<HTMLDivElement, CreateFormProps>(CreateForm);

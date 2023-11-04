@@ -9,12 +9,10 @@ import CreateForm from '@/components/modals/CreateForm';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 
 interface SnapShot {
-  width: number;
-  height: number;
+  dateBoxWidth: number;
+  dateBoxHeight: number;
   top: number;
-  bottom: number;
   left: number;
-  right: number;
 }
 
 interface DragState {
@@ -23,18 +21,17 @@ interface DragState {
 }
 
 const InitialSnapshot = {
-  width: 0,
-  height: 0,
+  dateBoxWidth: 0,
+  dateBoxHeight: 0,
   top: 0,
-  bottom: 0,
   left: 0,
-  right: 0,
 };
 
 export default function MonthCalendar() {
   const { selectedDate, actions } = useMainCalendar();
 
   const dateContainerRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const snapshotRef = useRef<SnapShot>(InitialSnapshot);
 
   const [mouseDown, setMouseDown] = useState(false);
@@ -42,6 +39,9 @@ export default function MonthCalendar() {
     start: new Date(),
     end: new Date(),
   });
+
+  const [modalStyle, setModalStyle] = useState({ left: 0, top: 0, opacity: 0 });
+  const [modalMounted, setModalMounted] = useState(false);
 
   // selectedDate의 월 달력에 몇 주 있는지 체크
   const countWeeks = () => {
@@ -87,15 +87,22 @@ export default function MonthCalendar() {
     const dragStartIndex = getTargetDateIndex(dragDate.start);
     const dragEndIndex = getTargetDateIndex(dragDate.end);
 
-    const node = Array.from(dateContainerRef.current.children)[dragStartIndex] as HTMLDivElement;
-    if (!node) return;
+    const dragStartElement = Array.from(dateContainerRef.current.children)[dragStartIndex] as HTMLDivElement;
+    const dragEndElement = Array.from(dateContainerRef.current.children)[dragEndIndex] as HTMLDivElement;
+
     snapshotRef.current = {
-      width: node.offsetWidth,
-      height: node.offsetHeight,
-      top: node.getBoundingClientRect().top,
-      bottom: node.getBoundingClientRect().bottom,
-      left: node.getBoundingClientRect().left,
-      right: node.getBoundingClientRect().right,
+      dateBoxWidth: dragStartElement.offsetWidth,
+      dateBoxHeight: dragStartElement.offsetHeight,
+      top:
+        (dragStartElement.getBoundingClientRect().top +
+          dragEndElement.getBoundingClientRect().top +
+          dragStartElement.offsetHeight) /
+        2,
+      left:
+        (dragStartElement.getBoundingClientRect().left +
+          dragEndElement.getBoundingClientRect().left +
+          dragStartElement.offsetWidth) /
+        2,
     };
 
     let [smallIndex, largeIndex] = [dragStartIndex, dragEndIndex];
@@ -123,10 +130,6 @@ export default function MonthCalendar() {
     return 'text-gray-800';
   };
 
-  // 모달 생성 위치 계산
-  const calculateModalXPosition = () => ({ left: `${0}px` });
-  const calculateModalYPosition = () => ({ top: `${0}px` });
-
   // 모달 닫을 시 reset
   const resetDrag = () => {
     if (!dateContainerRef.current) return;
@@ -134,9 +137,35 @@ export default function MonthCalendar() {
       target.classList.remove('bg-blue-50');
     });
     setMouseDown(false);
+    setModalMounted(false);
+    setModalStyle((state) => ({ ...state, opacity: 0 }));
   };
 
   const { openModal, ModalPortal, modalOpen, closeModal } = useModal({ reset: resetDrag });
+
+  // 모달 생성 위치 계산
+  useEffect(() => {
+    if (!modalOpen) return;
+    if (modalMounted) return;
+    if (!dateContainerRef.current) return;
+    if (!modalRef.current) return;
+
+    const modalWidth = modalRef.current.offsetWidth;
+    const modalHeight = modalRef.current.offsetHeight;
+    const screenWidth = snapshotRef.current.dateBoxWidth * 7 + 256;
+    const screenHeight = snapshotRef.current.dateBoxHeight * countWeeks() + 88;
+
+    let left = snapshotRef.current.left - modalWidth / 2;
+    if (left < 256) left = 256 + 24;
+    else if (left + modalWidth > screenWidth) left = screenWidth - modalWidth - 24;
+
+    let { top } = snapshotRef.current;
+    if (top + modalHeight > screenHeight) top -= modalHeight;
+
+    setModalStyle({ left, top, opacity: 100 });
+
+    setModalMounted(true);
+  }, [modalOpen]);
 
   /**
    * 상태변화에 따른 모달 컨테이너의 리렌더링 방지
@@ -145,14 +174,15 @@ export default function MonthCalendar() {
     () => (
       <ModalPortal>
         <CreateForm
-          style={{ ...calculateModalXPosition(), ...calculateModalYPosition() }}
+          ref={modalRef}
+          style={{ ...modalStyle }}
           dragDate={dragDate}
           setDragDate={setDragDate}
           closeModal={closeModal}
         />
       </ModalPortal>
     ),
-    [modalOpen, closeModal],
+    [modalOpen, closeModal, modalStyle],
   );
 
   return (
