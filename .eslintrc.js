@@ -11,6 +11,7 @@ module.exports = {
     'prettier',
     'plugin:testing-library/react',
     'plugin:jest-dom/recommended',
+    'plugin:@tanstack/eslint-plugin-query/recommended',
   ],
   parserOptions: {
     sourceType: 'module',
