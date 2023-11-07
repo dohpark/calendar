@@ -1,21 +1,28 @@
-import { Dispatch, ForwardedRef, SetStateAction, forwardRef, useRef, useState } from 'react';
+import { Dispatch, FormEvent, ForwardedRef, SetStateAction, forwardRef, useRef, useState } from 'react';
 import Layer from '@/components/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
 import TextButton from '@/components/common/TextButton';
-import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 import { CalendarCreateType } from '@/types/calendar';
-import MiniCalendar from '@/components/MiniCalendar';
-import OutsideDetecter from '@/hooks/useOutsideDetector';
 import { useMainCalendar } from '@/store/mainCalendar';
-import ListBox from '@/components/common/ListBox';
-import { createTimeItems, getTimeDisplay } from '@/utils/calendar';
-import TimeListItem from './TimeListItem';
+import CalendarInput from './CalendarInput';
+import TimeInput from './TimeInput';
 
 interface LayerItemProps {
   Icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   children: React.ReactNode;
+}
+
+function LayerItem({ children, Icon }: LayerItemProps) {
+  return (
+    <div className="flex">
+      <div className="flex-none w-9 h-9 p-2 mr-2">
+        {Icon ? <Icon width="20" height="20" /> : <div className="w-5 h-5" />}
+      </div>
+      {children}
+    </div>
+  );
 }
 
 interface DragState {
@@ -30,88 +37,9 @@ interface CreateFormProps {
   closeModal: () => void;
 }
 
-interface CalendarInputProps {
-  date: Date;
-  label: string;
-  setDate: (date: Date) => void;
-  disabledFilterCallback?: (date: Date) => boolean;
-}
-
-interface TimeInputProps {
-  date: Date;
-  setTime: (hour: number, minute: number) => void;
-}
-
-function LayerItem({ children, Icon }: LayerItemProps) {
-  return (
-    <div className="flex">
-      <div className="flex-none w-9 h-9 p-2 mr-2">
-        {Icon ? <Icon width="20" height="20" /> : <div className="w-5 h-5" />}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function CalendarInput({ date, setDate, label, disabledFilterCallback }: CalendarInputProps) {
-  const [isFocus, setIsFocus] = useState(false);
-  return (
-    <>
-      <input
-        aria-label={label}
-        className="w-24 outline-none rounded px-1 py-1 hover:bg-zinc-100 cursor-pointer"
-        value={`${date.getMonth() + 1}월 ${date.getDate()}일 (${DAYS_OF_THE_WEEK[date.getDay()]})`}
-        onClick={() => {
-          setIsFocus((state) => !state);
-        }}
-        readOnly
-      />
-      {isFocus ? (
-        <OutsideDetecter callback={() => setIsFocus(false)} classExtend={['absolute', 'top-8', 'left-0']}>
-          <MiniCalendar
-            selectDate={setDate}
-            selectedDate={date}
-            disabledFilterCallback={disabledFilterCallback}
-            classExtend={['bg-white', 'w-52', 'shadow-box-2', 'p-2', 'rounded']}
-          />
-        </OutsideDetecter>
-      ) : null}
-    </>
-  );
-}
-
-function TimeInput({ date, setTime }: TimeInputProps) {
-  const [isFocus, setIsFocus] = useState(false);
-
-  return (
-    <>
-      <input
-        aria-label="start time"
-        className="w-20 outline-none rounded px-1 py-1 hover:bg-zinc-100 cursor-pointer"
-        value={getTimeDisplay(date.getHours(), date.getMinutes())}
-        onClick={() => {
-          setIsFocus((state) => !state);
-        }}
-        readOnly
-      />
-      {isFocus ? (
-        <OutsideDetecter callback={() => setIsFocus(false)} classExtend={['absolute', 'top-8', 'left-0']}>
-          <ListBox<{ key: string; hour: number; minute: number }>
-            classExtend={['w-40', 'h-44', 'overflow-y-auto']}
-            ItemComponent={TimeListItem}
-            onClick={(hour: number, minute: number) => setTime(hour, minute)}
-            sourceName="time"
-            items={createTimeItems()}
-          />
-        </OutsideDetecter>
-      ) : null}
-    </>
-  );
-}
-
 function CreateForm(
   { style = {}, dragDate, setDragDate, closeModal }: CreateFormProps,
-  ref: ForwardedRef<HTMLDivElement>,
+  ref: ForwardedRef<HTMLFormElement>,
 ) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [type, setType] = useState<CalendarCreateType>('event');
@@ -159,8 +87,14 @@ function CreateForm(
     return false;
   };
 
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    console.log('submit');
+    e.preventDefault();
+  };
+
   return (
-    <div
+    <form
+      onSubmit={handleSubmit}
       style={style}
       ref={ref}
       role="dialog"
@@ -269,14 +203,14 @@ function CreateForm(
         <div className="flex flex-row-reverse mt-5">
           <TextButton
             classExtend={['px-5', 'py-2', 'text-sm', 'bg-blue-500', 'text-white', 'hover:!bg-blue-600']}
-            type="button"
+            type="submit"
           >
             저장
           </TextButton>
         </div>
       </Layer>
-    </div>
+    </form>
   );
 }
 
-export default forwardRef<HTMLDivElement, CreateFormProps>(CreateForm);
+export default forwardRef<HTMLFormElement, CreateFormProps>(CreateForm);

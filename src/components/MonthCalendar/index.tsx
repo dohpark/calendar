@@ -31,7 +31,7 @@ export default function MonthCalendar() {
   const { selectedDate, actions } = useMainCalendar();
 
   const dateContainerRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLFormElement>(null);
   const snapshotRef = useRef<SnapShot>(InitialSnapshot);
 
   const [mouseDown, setMouseDown] = useState(false);
