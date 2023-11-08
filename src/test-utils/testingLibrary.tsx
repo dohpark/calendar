@@ -5,7 +5,7 @@ import { ReactElement } from 'react';
 import fs from 'fs';
 import path from 'path';
 
-const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>): RenderResult => {
+const customRender = (ui: ReactElement, options?: RenderOptions): RenderResult => {
   const view = render(ui, options);
 
   // tailwindcss 적용

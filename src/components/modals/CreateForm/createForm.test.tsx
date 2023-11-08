@@ -2,9 +2,10 @@ import { render, renderHook, screen, act, fireEvent, within } from '@/test-utils
 import MonthCalendar from '@/components/MonthCalendar';
 import { useMainCalendar } from '@/store/mainCalendar';
 import userEvent from '@testing-library/user-event';
+import TestingQueryClientProvider from '@/test-utils/TestingQueryClientProvider';
 
 test('월 달력에서 드래그를 통해 여러 날을 선택하면 이벤트 생성시 드래그한 날들이 모달에 반영된다. 그러나 시간을 선택할 수 없다.', () => {
-  render(<MonthCalendar />);
+  render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
@@ -33,7 +34,7 @@ test('월 달력에서 드래그를 통해 여러 날을 선택하면 이벤트 
 
 test('월 달력에서 이벤트 생성시 타입을 할일로 선택하면 하루만 선택 가능하다. 여러 날을 드래그로 통해 선택해도 타입을 할일로 바꾸면 드래그한 첫번째 날로 선택된다.', async () => {
   const user = userEvent.setup();
-  render(<MonthCalendar />);
+  render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
@@ -63,7 +64,7 @@ test('월 달력에서 이벤트 생성시 타입을 할일로 선택하면 하�
 
 test('이벤트 생성 타입을 할일로 선택하면 시간을 선택하거나 종일로 선택할 수 있다.', async () => {
   const user = userEvent.setup();
-  render(<MonthCalendar />);
+  render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
@@ -101,7 +102,7 @@ test('이벤트 생성 타입을 할일로 선택하면 시간을 선택하거�
 
 test('모달에서 날짜 선택 수정시 메인 달력에 반영된다. (메인 달력에서 선택한 날짜들의 배경 색상은 blue50이다.)', async () => {
   const user = userEvent.setup();
-  render(<MonthCalendar />);
+  render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());

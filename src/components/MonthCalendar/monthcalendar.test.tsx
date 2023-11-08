@@ -4,6 +4,7 @@ import { countMonthDays } from '@/utils/calendar';
 import { useMainCalendar } from '@/store/mainCalendar';
 import userEvent from '@testing-library/user-event';
 import Home from '@/app/page';
+import TestingQueryClientProvider from '@/test-utils/TestingQueryClientProvider';
 
 test('디폴트로 현재 월의 달력을 보인다.', () => {
   render(<MonthCalendar />);
@@ -61,7 +62,7 @@ test('달의 첫번째 날은 00월 00일로 나타나고 나머지는 00일로 
 
 test('00일 칸을 클릭하면 할일 및 이벤트 생성 모달이 나타난다.', async () => {
   const user = userEvent.setup();
-  render(<MonthCalendar />);
+  render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
@@ -109,7 +110,7 @@ test('이벤트 및 할일이 너무 많은 경우 00개 더보기가 나타난�
 test('00개 더보기 클릭시 이벤트 및 할일 전체를 나타내는 모달이 나타난다.', () => {});
 
 test('날짜를 드래그하여 드래그를 통해 선택한 날짜에 이벤트를 생성할 수 있다. 드래그하여 선택한 날짜의 배경 색상은 blue50이다.', async () => {
-  render(<MonthCalendar />);
+  render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
