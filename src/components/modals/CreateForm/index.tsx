@@ -4,8 +4,10 @@ import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
 import TextButton from '@/components/common/TextButton';
-import { CalendarCreateType } from '@/types/calendar';
 import { useMainCalendar } from '@/store/mainCalendar';
+import { useMutation } from '@tanstack/react-query';
+import scheduleApi from '@/api/schedule';
+import { CreateSchedule } from '@/types/schedule';
 import CalendarInput from './CalendarInput';
 import TimeInput from './TimeInput';
 
@@ -42,54 +44,65 @@ function CreateForm(
   ref: ForwardedRef<HTMLFormElement>,
 ) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [type, setType] = useState<CalendarCreateType>('event');
-  const [isAllDay, setIsAllDay] = useState(true);
-  const [startDate, setStartDate] = useState(dragDate.start < dragDate.end ? dragDate.start : dragDate.end);
-  const [endDate, setEndDate] = useState(dragDate.start > dragDate.end ? dragDate.start : dragDate.end);
+  const [form, setForm] = useState<CreateSchedule>({
+    type: 'event',
+    title: '',
+    description: null,
+    from: dragDate.start < dragDate.end ? dragDate.start : dragDate.end,
+    until: dragDate.start > dragDate.end ? dragDate.start : dragDate.end,
+    allDay: true,
+  });
+
+  const { mutate: createSchedule } = useMutation({ mutationFn: () => scheduleApi.create(form) });
 
   const { actions } = useMainCalendar();
 
   const setEventStartDate = (targetDate: Date) => {
-    setStartDate(targetDate);
-    if (targetDate.getFullYear() !== startDate.getFullYear() || targetDate.getMonth() !== startDate.getMonth()) {
+    setForm((prevForm) => ({ ...prevForm, from: targetDate }));
+    if (targetDate.getFullYear() !== form.from.getFullYear() || targetDate.getMonth() !== form.from.getMonth()) {
       actions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
     }
-    setDragDate({ start: targetDate, end: endDate });
+    setDragDate({ start: targetDate, end: form.until });
   };
 
   const setEventEndDate = (targetDate: Date) => {
-    setEndDate(targetDate);
+    setForm((prevForm) => ({ ...prevForm, until: targetDate }));
     setDragDate((prevDate) => ({ ...prevDate, end: targetDate }));
   };
 
+  const initTodo = () => {
+    setForm((prevForm) => ({ ...prevForm, until: form.from, type: 'todo' }));
+    setDragDate({ start: form.from, end: form.from });
+  };
+
   const setTodoDate = (targetDate: Date) => {
-    setStartDate(targetDate);
-    setEndDate(targetDate);
+    setForm((prevForm) => ({ ...prevForm, from: targetDate, until: targetDate }));
     setDragDate({ start: targetDate, end: targetDate });
-    if (targetDate.getFullYear() !== startDate.getFullYear() || targetDate.getMonth() !== startDate.getMonth()) {
+    if (targetDate.getFullYear() !== form.from.getFullYear() || targetDate.getMonth() !== form.from.getMonth()) {
       actions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
     }
   };
 
   const setTodoTime = (hour: number, minute: number) => {
-    const targetDate = new Date(startDate);
+    const targetDate = new Date(form.from);
     targetDate.setHours(hour, minute);
-    setStartDate(targetDate);
+    setForm((prevForm) => ({ ...prevForm, from: targetDate }));
   };
 
   const startDisabledFilterCallback = (date: Date) => {
-    if (date > endDate) return true;
+    if (date > form.until) return true;
     return false;
   };
 
   const endDisabledFilterCallback = (date: Date) => {
-    if (date < startDate) return true;
+    if (date < form.from) return true;
     return false;
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    console.log('submit');
     e.preventDefault();
+    createSchedule();
+    closeModal();
   };
 
   return (
@@ -107,7 +120,12 @@ function CreateForm(
       </div>
       <Layer gap="3" classExtend={['p-4']}>
         <LayerItem>
-          <input placeholder="제목" className="border-b-2 w-full p-1 text-lg outline-none" />
+          <input
+            placeholder="제목"
+            className="border-b-2 w-full p-1 text-lg outline-none"
+            value={form.title}
+            onChange={(e) => setForm((prevForm) => ({ ...prevForm, title: e.target.value }))}
+          />
         </LayerItem>
         <LayerItem>
           <input
@@ -115,8 +133,8 @@ function CreateForm(
             type="radio"
             id="event"
             value="event"
-            checked={type === 'event'}
-            onChange={() => setType('event')}
+            checked={form.type === 'event'}
+            onChange={() => setForm((prevForm) => ({ ...prevForm, type: 'event' }))}
           />
           <label
             className="text-sm px-3 py-1 mr-2 leading-7 cursor-pointer rounded hover:bg-zinc-100 peer-checked/event:bg-blue-100 peer-checked/event:text-blue-500"
@@ -130,8 +148,8 @@ function CreateForm(
             type="radio"
             id="todo"
             value="todo"
-            checked={type === 'todo'}
-            onChange={() => setType('todo')}
+            checked={form.type === 'todo'}
+            onChange={() => initTodo()}
           />
           <label
             className="text-sm px-3 py-1 mr-4 leading-7 cursor-pointer rounded hover:bg-zinc-100 peer-checked/todo:bg-blue-100 peer-checked/todo:text-blue-500"
@@ -141,12 +159,12 @@ function CreateForm(
           </label>
         </LayerItem>
         <LayerItem Icon={Time}>
-          {type === 'event' ? (
+          {form.type === 'event' ? (
             <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
               <span className="relative" aria-label="event start date">
                 <CalendarInput
                   label="start date"
-                  date={startDate}
+                  date={form.from}
                   setDate={setEventStartDate}
                   disabledFilterCallback={startDisabledFilterCallback}
                 />
@@ -155,22 +173,22 @@ function CreateForm(
               <span className="relative" aria-label="event end date">
                 <CalendarInput
                   label="end date"
-                  date={endDate}
+                  date={form.until}
                   setDate={setEventEndDate}
                   disabledFilterCallback={endDisabledFilterCallback}
                 />
               </span>
             </div>
           ) : null}
-          {type === 'todo' ? (
+          {form.type === 'todo' ? (
             <div className="self-center text-sm">
               <div role="presentation" aria-label="create form selected date">
                 <span className="relative" aria-label="todo start date">
-                  <CalendarInput label="start date" date={startDate} setDate={setTodoDate} />
+                  <CalendarInput label="start date" date={form.from} setDate={setTodoDate} />
                 </span>
-                {!isAllDay ? (
+                {!form.allDay ? (
                   <span className="ml-3 relative">
-                    <TimeInput date={startDate} setTime={setTodoTime} />
+                    <TimeInput date={form.from} setTime={setTodoTime} />
                   </span>
                 ) : null}
               </div>
@@ -179,8 +197,8 @@ function CreateForm(
                   type="checkbox"
                   id="allday"
                   className="w-4 h-4 mr-2"
-                  checked={isAllDay}
-                  onChange={() => setIsAllDay((state) => !state)}
+                  checked={form.allDay}
+                  onChange={() => setForm((prevForm) => ({ ...prevForm, allDay: !prevForm.allDay }))}
                 />
                 <label htmlFor="allday">종일</label>
               </div>
