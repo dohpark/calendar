@@ -210,7 +210,7 @@ export default function MonthCalendar() {
               if (mouseDown) setDragDate((state) => ({ ...state, end: new Date(year, month - 1, date) }));
             }}
             onMouseUp={() => {
-              openModal();
+              if (mouseDown) openModal();
             }}
             onKeyDown={(e) => {
               if (e.code === 'Space') openModal();
@@ -222,10 +222,13 @@ export default function MonthCalendar() {
                 month={month}
                 date={date}
                 classExtend={[date !== 1 ? 'w-6' : '!w-auto', getDateButtonCss(year, month, date)]}
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                onClick={(e) => {
                   e.stopPropagation();
                   actions.setCalendarUnit('D');
                   actions.setSelectedDate(new Date(year, month - 1, date));
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
                 }}
               >
                 {date === 1 ? `${month}월 ${date}일` : date}
