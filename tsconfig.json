@@ -23,7 +23,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"],
-      "@prisma-client/*": ["./prisma/*"]
+      "@prisma-client/*": ["./prisma/*"],
+      "@mocks/*": ["./__mocks__/*"]
     }
   },
   "include": ["types/next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "**/*.js", "**/*.jsx"],
