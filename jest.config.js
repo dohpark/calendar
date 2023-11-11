@@ -6,11 +6,15 @@ const createJestConfig = nextJest({ dir: './' });
 // Any custom config you want to pass to Jest
 /** @type {import('jest').Config} */
 const customJestConfig = {
+  setupFiles: ['./jest.polyfills.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
   preset: 'ts-jest',
   moduleNameMapper: {
     '^.+\\.(svg)$': '<rootDir>/__mocks__/svg.jsx',
+  },
+  testEnvironmentOptions: {
+    customExportConditions: [''],
   },
 };
 
