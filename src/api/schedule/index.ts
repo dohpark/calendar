@@ -9,7 +9,11 @@ const scheduleApi = {
       .then((response: AxiosResponse) => response)
       .catch((error: AxiosError) => error),
   delete: async () => {},
-  getMonth: async () => {},
+  getMonth: async (year: number, month: number) =>
+    axios
+      .get(`${API.MONTH_SCHEDULE_URL}?year=${year}&month=${month}`)
+      .then((response: AxiosResponse) => response.data)
+      .catch((error: AxiosError) => error),
   getDay: async () => {},
   getWeek: async () => {},
 };
