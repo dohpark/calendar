@@ -19,6 +19,8 @@ const customRender = (ui: ReactElement, options?: RenderOptions): RenderResult =
   portal.id = 'modal-root';
   container.appendChild(portal);
 
+  // resizeobserver 적용
+
   return view;
 };
 

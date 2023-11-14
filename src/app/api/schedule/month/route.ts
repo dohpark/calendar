@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/render-result-naming-convention */
 import { NextResponse } from 'next/server';
 import prisma from '@prisma-client/client';
 import url from 'node:url';
@@ -6,10 +7,9 @@ import {
   getDateExcludingTime,
   getFirstDayInFirstWeekOfMonth,
   getLastDayInLastWeekOfMonth,
+  isSameDate,
 } from '@/utils/calendar';
-import { Schedule } from '@/types/schedule';
-
-type ScheduleArray = { date: Date; schedules: Schedule[] }[];
+import { ScheduleArray, RenderType } from '@/types/schedule';
 
 export async function GET(req: Request) {
   const { query } = url.parse(req.url, true);
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
 
       target.setDate(target.getDate() + count - target.getDay());
 
-      return { date: new Date(target), schedules: [] };
+      return { date: new Date(target), schedules: [], renderOrder: [] };
     },
   );
 
@@ -54,16 +54,87 @@ export async function GET(req: Request) {
 
     targetSchedules.forEach((targetSchedule) => {
       selectedMonthArray.forEach(({ date, schedules }) => {
-        if (getDateExcludingTime(targetSchedule.from) <= date && date <= getDateExcludingTime(targetSchedule.until)) {
-          const type =
-            targetSchedule.type === 'event' || targetSchedule.type === 'todo' ? targetSchedule.type : 'event';
+        const type = targetSchedule.type === 'event' || targetSchedule.type === 'todo' ? targetSchedule.type : 'event';
+        const targetScheduleStartDate = getDateExcludingTime(targetSchedule.from);
+        const targetScheduleEndDate = getDateExcludingTime(targetSchedule.until);
+
+        if (targetScheduleStartDate <= date && date <= targetScheduleEndDate) {
+          let renderType: RenderType = 'continue';
+          let render = 0;
+
+          if (isSameDate(targetScheduleStartDate, date) && isSameDate(targetScheduleEndDate, date)) {
+            renderType = 'startEnd';
+            render = 1;
+          } else if (isSameDate(targetScheduleStartDate, date) || date.getDay() === 0) {
+            renderType = 'start';
+            render = Math.min(
+              targetScheduleEndDate.getDate() - targetScheduleStartDate.getDate() + 1,
+              targetScheduleEndDate.getDate() - date.getDate() + 1,
+              7 - date.getDay(),
+              7,
+            );
+          } else if (isSameDate(targetScheduleEndDate, date) || date.getDay() === 6) {
+            renderType = 'end';
+            render = 0;
+          }
 
           schedules.push({
             ...targetSchedule,
             type,
+            renderType,
+            render,
           });
         }
       });
+    });
+
+    selectedMonthArray.forEach(({ schedules }) =>
+      schedules.sort((a, b) => {
+        if (a.type !== b.type) {
+          if (a.type === 'event') return -1;
+          return 1;
+        }
+        return a.title.localeCompare(b.title);
+      }),
+    );
+
+    selectedMonthArray.forEach(({ date, renderOrder, schedules }, index) => {
+      if (date.getDay() === 0) {
+        schedules.forEach(({ id }) => renderOrder.push(id));
+      } else {
+        const newOrder: number[] = [];
+        const idArr = schedules.map((schedule) => schedule.id);
+        const deque: number[] = [];
+        const prevRenderOrder = selectedMonthArray[index - 1].renderOrder;
+        prevRenderOrder.forEach((id, index2) => {
+          if (idArr.includes(id)) newOrder.push(id);
+          else {
+            newOrder.push(-1);
+            deque.push(index2);
+          }
+        });
+
+        idArr.forEach((id) => {
+          if (!prevRenderOrder.includes(id)) {
+            if (deque.length) {
+              const index3 = deque.shift()!;
+              newOrder[index3] = id;
+            } else {
+              newOrder.push(id);
+            }
+          }
+        });
+
+        while (newOrder.length) {
+          const id = newOrder.pop()!;
+          if (id !== -1) {
+            newOrder.push(id);
+            break;
+          }
+        }
+
+        renderOrder.push(...newOrder);
+      }
     });
 
     return NextResponse.json({ selectedMonthArray }, { status: 200 });

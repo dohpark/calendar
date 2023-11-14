@@ -13,3 +13,8 @@ export interface Schedule {
 }
 
 export type CreateSchedule = Omit<Schedule, 'id' | 'deleted' | 'createdAt'>;
+export type RenderType = 'start' | 'end' | 'continue' | 'startEnd';
+export type ScheduleApi = Schedule & { renderType: RenderType; render: number };
+export type ScheduleWithDateAndOrder = { date: Date; renderOrder: number[]; schedules: ScheduleApi[] };
+export type ScheduleArray = ScheduleWithDateAndOrder[];
+export type ScheduleArrayApi = { selectedMonthArray: ScheduleArray };

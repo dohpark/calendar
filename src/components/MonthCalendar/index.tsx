@@ -3,63 +3,45 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMainCalendar } from '@/store/mainCalendar';
 import DateButton from '@/components/common/DateButton';
-import { countMonthDays } from '@/utils/calendar';
+import { countDaysInMonthCalendar, countWeeksInMonthCalendar } from '@/utils/calendar';
 import useModal from '@/hooks/useModal';
 import CreateForm from '@/components/modals/CreateForm';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
-
-interface SnapShot {
-  dateBoxWidth: number;
-  dateBoxHeight: number;
-  top: number;
-  left: number;
-}
+import { useQuery } from '@tanstack/react-query';
+import scheduleApi from '@/api/schedule';
+import { ScheduleArray } from '@/types/schedule';
+import Schedule from './Schedule';
 
 interface DragState {
   start: Date;
   end: Date;
 }
 
-const InitialSnapshot = {
-  dateBoxWidth: 0,
-  dateBoxHeight: 0,
-  top: 0,
-  left: 0,
-};
-
 export default function MonthCalendar() {
   const { selectedDate, actions } = useMainCalendar();
 
   const dateContainerRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLFormElement>(null);
-  const snapshotRef = useRef<SnapShot>(InitialSnapshot);
 
   const [mouseDown, setMouseDown] = useState(false);
   const [dragDate, setDragDate] = useState<DragState>({
     start: new Date(),
     end: new Date(),
   });
+  const [dateBoxSize, setDateBoxSize] = useState({
+    width: 0,
+    height: 0,
+  });
+  const [modalPosition, setModalPosition] = useState({
+    top: 0,
+    left: 0,
+  });
 
   const [modalStyle, setModalStyle] = useState({ left: 0, top: 0, opacity: 0 });
   const [modalMounted, setModalMounted] = useState(false);
 
-  // selectedDate의 월 달력에 몇 주 있는지 체크
-  const countWeeks = () => {
-    const target = new Date(selectedDate);
-
-    target.setDate(1);
-    const lastMonthDaysofFirstWeekCount = target.getDay();
-
-    const currentMonthDaysCount = countMonthDays(target);
-
-    return Math.ceil((currentMonthDaysCount + lastMonthDaysofFirstWeekCount) / 7);
-  };
-
-  // selectedDate 월 달력에 며칠이 존재하는지 확인
-  const countDays = () => countWeeks() * 7;
-
   // selectedDate의 월 달력 내의 날짜 생성
-  const selectedMonthDateArray = Array.from({ length: countDays() }, (_, count) => {
+  const selectedMonthDateArray = Array.from({ length: countDaysInMonthCalendar(selectedDate) }, (_, count) => {
     const targetDate = new Date(selectedDate);
     targetDate.setDate(1);
     const days = targetDate.getDay();
@@ -78,6 +60,34 @@ export default function MonthCalendar() {
     return index;
   };
 
+  const fetchSchedule = (): Promise<ScheduleArray> =>
+    scheduleApi.getMonth(selectedDate.getFullYear(), selectedDate.getMonth() + 1);
+  const { data, isSuccess } = useQuery({
+    queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}`],
+    queryFn: fetchSchedule,
+    refetchOnWindowFocus: false,
+  });
+
+  // ResizeObserver를 활용하여 window 크기 변동시 자동으로 dateBoxSize 크기를 저장
+  useEffect(() => {
+    if (!dateContainerRef.current) return;
+
+    const element = Array.from(dateContainerRef.current.children)[0] as HTMLDivElement;
+
+    const observer = new ResizeObserver(() => {
+      setDateBoxSize({
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+      });
+    });
+
+    observer.observe(element);
+    // eslint-disable-next-line consistent-return
+    return () => {
+      observer.disconnect();
+    };
+  }, [selectedDate.getFullYear(), selectedDate.getMonth()]);
+
   // dragDate의 변화 및 mouseDown에 맞춰 snapshotRef 값 변경 및 drag한 날짜들 배경색상 변화
   useEffect(() => {
     if (!dateContainerRef.current) return;
@@ -90,9 +100,7 @@ export default function MonthCalendar() {
     const dragStartElement = Array.from(dateContainerRef.current.children)[dragStartIndex] as HTMLDivElement;
     const dragEndElement = Array.from(dateContainerRef.current.children)[dragEndIndex] as HTMLDivElement;
 
-    snapshotRef.current = {
-      dateBoxWidth: dragStartElement.offsetWidth,
-      dateBoxHeight: dragStartElement.offsetHeight,
+    setModalPosition({
       top:
         (dragStartElement.getBoundingClientRect().top +
           dragEndElement.getBoundingClientRect().top +
@@ -103,7 +111,7 @@ export default function MonthCalendar() {
           dragEndElement.getBoundingClientRect().left +
           dragStartElement.offsetWidth) /
         2,
-    };
+    });
 
     let [smallIndex, largeIndex] = [dragStartIndex, dragEndIndex];
     if (smallIndex > largeIndex) {
@@ -152,14 +160,14 @@ export default function MonthCalendar() {
 
     const modalWidth = modalRef.current.offsetWidth;
     const modalHeight = modalRef.current.offsetHeight;
-    const screenWidth = snapshotRef.current.dateBoxWidth * 7 + 256;
-    const screenHeight = snapshotRef.current.dateBoxHeight * countWeeks() + 88;
+    const screenWidth = dateBoxSize.width * 7 + 256;
+    const screenHeight = dateBoxSize.height * countWeeksInMonthCalendar(selectedDate) + 88;
 
-    let left = snapshotRef.current.left - modalWidth / 2;
+    let left = modalPosition.left - modalWidth / 2;
     if (left < 256) left = 256 + 24;
     else if (left + modalWidth > screenWidth) left = screenWidth - modalWidth - 24;
 
-    let { top } = snapshotRef.current;
+    let { top } = modalPosition;
     if (top + modalHeight > screenHeight) top -= modalHeight;
 
     setModalStyle({ left, top, opacity: 100 });
@@ -194,12 +202,15 @@ export default function MonthCalendar() {
           </div>
         ))}
       </div>
-      <div ref={dateContainerRef} className="grid grid-cols-7 text-xs text-center overflow-hidden select-none">
-        {selectedMonthDateArray.map(({ year, month, date }) => (
+      <div
+        ref={dateContainerRef}
+        className="grid auto-rows-fr grid-cols-7 text-xs text-center overflow-hidden select-none"
+      >
+        {selectedMonthDateArray.map(({ year, month, date }, index) => (
           <div
             role="gridcell"
             tabIndex={0}
-            className="border-l border-b cursor-pointer grid grid-rows-auto-start gap-0 auto-rows-min"
+            className="border-l border-b grid grid-rows-auto-start gap-0 auto-rows-min"
             key={`${year}-${month}-${date}`}
             aria-label={`${year}-${month}-${date}-cell`}
             onMouseDown={() => {
@@ -234,7 +245,7 @@ export default function MonthCalendar() {
                 {date === 1 ? `${month}월 ${date}일` : date}
               </DateButton>
             </div>
-            <div />
+            {isSuccess ? <Schedule data={data[index]} width={dateBoxSize.width} /> : <div />}
           </div>
         ))}
       </div>

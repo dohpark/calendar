@@ -1,11 +1,12 @@
-import { act, render, renderHook, screen, within } from '@/test-utils/testingLibrary';
+import { act, render, renderHook, screen, waitFor, within } from '@/test-utils/testingLibrary';
 import userEvent from '@testing-library/user-event';
 import { useMainCalendar } from '@/store/mainCalendar';
 import Home from '@/app/page';
+import TestingQueryClientProvider from '@/test-utils/TestingQueryClientProvider';
 
 test('미니달력에서 날짜를 선택시 메인달력에서 선택 날짜가 반영된다.', async () => {
   const user = userEvent.setup();
-  render(<Home />);
+  render(<Home />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 12월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
@@ -35,7 +36,7 @@ test('미니달력에서 날짜를 선택시 메인달력에서 선택 날짜가
 
 test('헤더에서 왼쪽 및 오른쪽 버튼을 클릭을 통한 날짜 선택이 미니달력에도 같이 반영이 된다.', async () => {
   const user = userEvent.setup();
-  render(<Home />);
+  render(<Home />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 12월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendar());
@@ -47,6 +48,8 @@ test('헤더에서 왼쪽 및 오른쪽 버튼을 클릭을 통한 날짜 선택
   await user.click(mainCalendarLeftButton);
 
   // 미니달력에 2023년 11월로 표시
-  const miniCalendarDisplayDate = screen.getByRole('presentation', { name: /mini calendar display year and month/i });
-  expect(miniCalendarDisplayDate).toHaveTextContent(`2023년 11월`);
+  await waitFor(() => {
+    const miniCalendarDisplayDate = screen.getByRole('presentation', { name: /mini calendar display year and month/i });
+    expect(miniCalendarDisplayDate).toHaveTextContent(`2023년 11월`);
+  });
 });

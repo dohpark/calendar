@@ -27,3 +27,6 @@ Object.defineProperties(global, {
   Request: { value: Request },
   Response: { value: Response },
 });
+
+// resize observer polyfill 적용
+global.ResizeObserver = require('resize-observer-polyfill');
