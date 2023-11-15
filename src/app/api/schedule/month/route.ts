@@ -5,6 +5,7 @@ import url from 'node:url';
 import {
   countDaysInMonthCalendar,
   getDateExcludingTime,
+  getDateRange,
   getFirstDayInFirstWeekOfMonth,
   getLastDayInLastWeekOfMonth,
   isSameDate,
@@ -68,8 +69,8 @@ export async function GET(req: Request) {
           } else if (isSameDate(targetScheduleStartDate, date) || date.getDay() === 0) {
             renderType = 'start';
             render = Math.min(
-              targetScheduleEndDate.getDate() - targetScheduleStartDate.getDate() + 1,
-              targetScheduleEndDate.getDate() - date.getDate() + 1,
+              getDateRange(targetScheduleStartDate, targetScheduleEndDate) + 1,
+              getDateRange(date, targetScheduleEndDate) + 1,
               7 - date.getDay(),
               7,
             );

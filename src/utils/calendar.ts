@@ -99,3 +99,12 @@ export const isSameDate = (date1: Date, date2: Date) =>
   date1.getFullYear() === date2.getFullYear() &&
   date1.getMonth() === date2.getMonth() &&
   date1.getDate() === date2.getDate();
+
+/**
+ * 두 날짜 간의 차 확인
+ */
+export const getDateRange = (date1: Date, date2: Date) => {
+  const differenceInTime = date2.getTime() - date1.getTime();
+  const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+  return differenceInDays;
+};
