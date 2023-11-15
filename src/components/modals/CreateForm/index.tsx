@@ -5,7 +5,7 @@ import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
 import TextButton from '@/components/common/TextButton';
 import { useMainCalendar } from '@/store/mainCalendar';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import { CreateSchedule } from '@/types/schedule';
 import CalendarInput from './CalendarInput';
@@ -53,9 +53,16 @@ function CreateForm(
     allDay: true,
   });
 
-  const { mutate: createSchedule } = useMutation({ mutationFn: () => scheduleApi.create(form) });
+  const { selectedDate, actions } = useMainCalendar();
 
-  const { actions } = useMainCalendar();
+  const queryClient = useQueryClient();
+  const { mutate: createSchedule } = useMutation({
+    mutationFn: () => scheduleApi.create(form),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}`] });
+      closeModal();
+    },
+  });
 
   const setEventStartDate = (targetDate: Date) => {
     setForm((prevForm) => ({ ...prevForm, from: targetDate }));
@@ -102,7 +109,6 @@ function CreateForm(
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     createSchedule();
-    closeModal();
   };
 
   return (
