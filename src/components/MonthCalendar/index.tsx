@@ -68,6 +68,33 @@ export default function MonthCalendar() {
     refetchOnWindowFocus: false,
   });
 
+  // dateBoxSize의 높이에 맞춰 hiddenRender 계산
+  const mutateData = () => {
+    if (!data) return;
+    const set = new Set<number>();
+    const limit = Math.floor((dateBoxSize.height - 28) / 24);
+
+    data.forEach(({ schedules, renderOrder }, index) => {
+      if (renderOrder.length >= limit) {
+        const hidden = renderOrder.slice(limit - 1);
+        hidden.forEach((item) => {
+          if (item !== -1) set.add(item);
+        });
+        const setArray = Array.from(set);
+
+        // 1. hiddenRender에 추가
+        data[index].hiddenRender = [...setArray];
+
+        // 2. set의 element가 현재 renderType가 startend 혹은 end면 삭제
+        setArray.forEach((item) => {
+          const renderType = schedules.find((schedule) => schedule.id === item)?.renderType;
+          if (renderType === 'end' || renderType === 'startEnd') set.delete(item);
+        });
+      }
+    });
+  };
+  mutateData();
+
   // ResizeObserver를 활용하여 window 크기 변동시 자동으로 dateBoxSize 크기를 저장
   useEffect(() => {
     if (!dateContainerRef.current) return;
@@ -245,7 +272,7 @@ export default function MonthCalendar() {
                 {date === 1 ? `${month}월 ${date}일` : date}
               </DateButton>
             </div>
-            {isSuccess ? <Schedule data={data[index]} width={dateBoxSize.width} /> : <div />}
+            {isSuccess ? <Schedule data={data[index]} dateBoxSize={dateBoxSize} /> : <div />}
           </div>
         ))}
       </div>

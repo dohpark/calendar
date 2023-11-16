@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 
       target.setDate(target.getDate() + count - target.getDay());
 
-      return { date: new Date(target), schedules: [], renderOrder: [] };
+      return { date: new Date(target), schedules: [], renderOrder: [], hiddenRender: [] };
     },
   );
 
