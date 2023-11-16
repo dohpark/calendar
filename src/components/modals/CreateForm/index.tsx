@@ -8,24 +8,9 @@ import { useMainCalendar } from '@/store/mainCalendar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import { CreateSchedule } from '@/types/schedule';
+import LayerItem from '@/components/modals/LayerItem';
 import CalendarInput from './CalendarInput';
 import TimeInput from './TimeInput';
-
-interface LayerItemProps {
-  Icon?: React.FC<React.SVGProps<SVGSVGElement>>;
-  children: React.ReactNode;
-}
-
-function LayerItem({ children, Icon }: LayerItemProps) {
-  return (
-    <div className="flex">
-      <div className="flex-none w-9 h-9 p-2 mr-2">
-        {Icon ? <Icon width="20" height="20" /> : <div className="w-5 h-5" />}
-      </div>
-      {children}
-    </div>
-  );
-}
 
 interface DragState {
   start: Date;
@@ -88,6 +73,10 @@ function CreateForm(
     if (targetDate.getFullYear() !== form.from.getFullYear() || targetDate.getMonth() !== form.from.getMonth()) {
       actions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
     }
+  };
+
+  const setDescription = (description: string) => {
+    setForm((prevForm) => ({ ...prevForm, description }));
   };
 
   const setTodoTime = (hour: number, minute: number) => {
@@ -215,12 +204,14 @@ function CreateForm(
           <textarea
             ref={textareaRef}
             rows={3}
+            value={form.description || ''}
             placeholder="설명 추가"
             className="w-full p-2 text-sm outline-none bg-gray-100 text-gray-700 rounded-sm resize-none"
-            onChange={() => {
+            onChange={(e) => {
               if (!textareaRef.current) return;
               textareaRef.current.style.height = 'auto';
               textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+              setDescription(e.target.value);
             }}
           />
         </LayerItem>

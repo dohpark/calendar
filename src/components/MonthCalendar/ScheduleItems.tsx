@@ -1,9 +1,12 @@
-import React from 'react';
-import { ScheduleWithDateAndOrder } from '@/types/schedule';
+import React, { Dispatch, SetStateAction } from 'react';
+import { Schedule, ScheduleWithDateAndOrder } from '@/types/schedule';
 
 interface SchedulesProps {
   data: ScheduleWithDateAndOrder;
   dateBoxSize: { width: number; height: number };
+  openModal: () => void;
+  setSelectedScheduleInfo: Dispatch<SetStateAction<Schedule>>;
+  setSelectedScheduleModalPosition: Dispatch<SetStateAction<{ top: number; left: number; width: number }>>;
 }
 
 interface ItemContainerProps {
@@ -36,9 +39,6 @@ function Item({ backgroundColor, children, ...props }: ItemProps) {
     <button
       {...props}
       className={`cursor-pointer h-[22px] text-left align-middle px-2 rounded leading-[22px] block w-full ${backgroundColor}`}
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
       onMouseDown={(e) => {
         e.stopPropagation();
       }}
@@ -48,7 +48,13 @@ function Item({ backgroundColor, children, ...props }: ItemProps) {
   );
 }
 
-export default function Schedule({ data, dateBoxSize }: SchedulesProps) {
+export default function ScheduleItems({
+  data,
+  dateBoxSize,
+  openModal,
+  setSelectedScheduleInfo,
+  setSelectedScheduleModalPosition,
+}: SchedulesProps) {
   const { date, renderOrder, schedules, hiddenRender } = data;
 
   const getOrder = (id: number) => renderOrder.indexOf(id);
@@ -73,7 +79,22 @@ export default function Schedule({ data, dateBoxSize }: SchedulesProps) {
                 top={getOrder(schedule.id) * 24}
                 width={schedule.render * dateBoxSize.width - 20}
               >
-                <Item aria-label={`${schedule.type}-${schedule.title}`} backgroundColor={getColor(schedule.type)}>
+                <Item
+                  aria-label={`${schedule.type}-${schedule.title}`}
+                  backgroundColor={getColor(schedule.type)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openModal();
+                    setSelectedScheduleInfo(schedule);
+
+                    const eventTarget = e.target as HTMLButtonElement;
+                    setSelectedScheduleModalPosition({
+                      left: eventTarget.getBoundingClientRect().left,
+                      top: eventTarget.getBoundingClientRect().top,
+                      width: eventTarget.offsetWidth,
+                    });
+                  }}
+                >
                   {schedule.type} {schedule.id}
                 </Item>
               </ItemContainer>

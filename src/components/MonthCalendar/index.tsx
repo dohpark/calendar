@@ -10,7 +10,9 @@ import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 import { useQuery } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import { ScheduleArray } from '@/types/schedule';
-import Schedule from './Schedule';
+import SelectedSchedule from '@/components/modals/SelectedSchedule';
+import { InitialScheduleInfo } from '@/constants/schedule';
+import ScheduleItems from './ScheduleItems';
 
 interface DragState {
   start: Date;
@@ -21,7 +23,8 @@ export default function MonthCalendar() {
   const { selectedDate, actions } = useMainCalendar();
 
   const dateContainerRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLFormElement>(null);
+  const createFormModalRef = useRef<HTMLFormElement>(null);
+  const selectedScheduleModalRef = useRef<HTMLDivElement>(null);
 
   const [mouseDown, setMouseDown] = useState(false);
   const [dragDate, setDragDate] = useState<DragState>({
@@ -32,13 +35,20 @@ export default function MonthCalendar() {
     width: 0,
     height: 0,
   });
-  const [modalPosition, setModalPosition] = useState({
+  const [createFormModalPosition, setCreateFormModalPosition] = useState({
     top: 0,
     left: 0,
   });
+  const [createFormModalStyle, setCreateFormModalStyle] = useState({ left: 0, top: 0, opacity: 0 });
+  const [createdFormModalMounted, setCreatedFormModalMounted] = useState(false);
 
-  const [modalStyle, setModalStyle] = useState({ left: 0, top: 0, opacity: 0 });
-  const [modalMounted, setModalMounted] = useState(false);
+  const [selectedScheduleInfo, setSelectedScheduleInfo] = useState(InitialScheduleInfo);
+  const [selectedScheduleModalPosition, setSelectedScheduleModalPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+  const [selectedScheduleModalStyle, setSelectedScheduleModalStyle] = useState({ left: 0, top: 0, opacity: 0 });
 
   // selectedDate의 월 달력 내의 날짜 생성
   const selectedMonthDateArray = Array.from({ length: countDaysInMonthCalendar(selectedDate) }, (_, count) => {
@@ -127,7 +137,7 @@ export default function MonthCalendar() {
     const dragStartElement = Array.from(dateContainerRef.current.children)[dragStartIndex] as HTMLDivElement;
     const dragEndElement = Array.from(dateContainerRef.current.children)[dragEndIndex] as HTMLDivElement;
 
-    setModalPosition({
+    setCreateFormModalPosition({
       top:
         (dragStartElement.getBoundingClientRect().top +
           dragEndElement.getBoundingClientRect().top +
@@ -172,35 +182,65 @@ export default function MonthCalendar() {
       target.classList.remove('bg-blue-50');
     });
     setMouseDown(false);
-    setModalMounted(false);
-    setModalStyle((state) => ({ ...state, opacity: 0 }));
+    setCreatedFormModalMounted(false);
+    setCreateFormModalStyle((state) => ({ ...state, opacity: 0 }));
   };
 
   const { openModal, ModalPortal, modalOpen, closeModal } = useModal({ reset: resetDrag });
+  const {
+    ModalPortal: SelectedSchedulePortal,
+    openModal: openSelectedScheduleModal,
+    closeModal: closeSelectedScheduleModal,
+    modalOpen: selectedScheduleModalOpen,
+  } = useModal({ reset: () => setSelectedScheduleModalStyle((state) => ({ ...state, opacity: 0 })) });
 
-  // 모달 생성 위치 계산
+  // 스케줄 생성 모달 생성 위치 계산
   useEffect(() => {
     if (!modalOpen) return;
-    if (modalMounted) return;
+    if (createdFormModalMounted) return;
     if (!dateContainerRef.current) return;
-    if (!modalRef.current) return;
+    if (!createFormModalRef.current) return;
 
-    const modalWidth = modalRef.current.offsetWidth;
-    const modalHeight = modalRef.current.offsetHeight;
+    const modalWidth = createFormModalRef.current.offsetWidth;
+    const modalHeight = createFormModalRef.current.offsetHeight;
     const screenWidth = dateBoxSize.width * 7 + 256;
     const screenHeight = dateBoxSize.height * countWeeksInMonthCalendar(selectedDate) + 88;
 
-    let left = modalPosition.left - modalWidth / 2;
+    let left = createFormModalPosition.left - modalWidth / 2;
     if (left < 256) left = 256 + 24;
     else if (left + modalWidth > screenWidth) left = screenWidth - modalWidth - 24;
 
-    let { top } = modalPosition;
+    let { top } = createFormModalPosition;
     if (top + modalHeight > screenHeight) top -= modalHeight;
 
-    setModalStyle({ left, top, opacity: 100 });
+    setCreateFormModalStyle({ left, top, opacity: 100 });
 
-    setModalMounted(true);
+    setCreatedFormModalMounted(true);
   }, [modalOpen]);
+
+  // 선택한 스케줄 모달 생성 위치 계산
+  useEffect(() => {
+    if (!selectedScheduleModalOpen) return;
+    if (!selectedScheduleModalRef.current) return;
+
+    const modalWidth = selectedScheduleModalRef.current.offsetWidth;
+    const modalHeight = selectedScheduleModalRef.current.offsetHeight;
+    const screenWidth = dateBoxSize.width * 7 + 256;
+    const screenHeight = dateBoxSize.height * countWeeksInMonthCalendar(selectedDate) + 88;
+    const itemWidth = selectedScheduleModalPosition.width;
+
+    let left = selectedScheduleModalPosition.left + itemWidth + 20;
+    let { top } = selectedScheduleModalPosition;
+
+    if (left + modalWidth > screenWidth) {
+      left = screenWidth - modalWidth - 8;
+      top += 24;
+    }
+
+    if (top + modalHeight > screenHeight) top -= modalHeight - 24;
+
+    setSelectedScheduleModalStyle({ left, top, opacity: 100 });
+  }, [selectedScheduleModalPosition, selectedScheduleModalOpen]);
 
   /**
    * 상태변화에 따른 모달 컨테이너의 리렌더링 방지
@@ -209,15 +249,15 @@ export default function MonthCalendar() {
     () => (
       <ModalPortal>
         <CreateForm
-          ref={modalRef}
-          style={{ ...modalStyle }}
+          ref={createFormModalRef}
+          style={{ ...createFormModalStyle }}
           dragDate={dragDate}
           setDragDate={setDragDate}
           closeModal={closeModal}
         />
       </ModalPortal>
     ),
-    [modalOpen, closeModal, modalStyle],
+    [modalOpen, closeModal, createFormModalStyle],
   );
 
   return (
@@ -272,11 +312,29 @@ export default function MonthCalendar() {
                 {date === 1 ? `${month}월 ${date}일` : date}
               </DateButton>
             </div>
-            {isSuccess ? <Schedule data={data[index]} dateBoxSize={dateBoxSize} /> : <div />}
+            {isSuccess ? (
+              <ScheduleItems
+                data={data[index]}
+                dateBoxSize={dateBoxSize}
+                openModal={openSelectedScheduleModal}
+                setSelectedScheduleInfo={setSelectedScheduleInfo}
+                setSelectedScheduleModalPosition={setSelectedScheduleModalPosition}
+              />
+            ) : (
+              <div />
+            )}
           </div>
         ))}
       </div>
       {modal}
+      <SelectedSchedulePortal>
+        <SelectedSchedule
+          ref={selectedScheduleModalRef}
+          style={{ ...selectedScheduleModalStyle }}
+          close={closeSelectedScheduleModal}
+          scheduleInfo={selectedScheduleInfo}
+        />
+      </SelectedSchedulePortal>
     </>
   );
 }
