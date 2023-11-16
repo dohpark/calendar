@@ -16,7 +16,7 @@ interface ItemContainerProps {
 }
 
 interface ItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  backgroundColor: string;
+  classExtend?: string[];
 }
 
 function ItemContainer({ children, top, width }: ItemContainerProps) {
@@ -34,11 +34,12 @@ function ItemContainer({ children, top, width }: ItemContainerProps) {
   );
 }
 
-function Item({ backgroundColor, children, ...props }: ItemProps) {
+function Item({ children, classExtend, ...props }: ItemProps) {
+  const classExtension = classExtend ? classExtend.join(' ') : '';
   return (
     <button
       {...props}
-      className={`cursor-pointer h-[22px] text-left align-middle px-2 rounded leading-[22px] block w-full ${backgroundColor}`}
+      className={`cursor-pointer h-[22px] text-left align-middle px-2 rounded leading-[22px] block w-full ${classExtension}`}
       onMouseDown={(e) => {
         e.stopPropagation();
       }}
@@ -81,7 +82,7 @@ export default function ScheduleItems({
               >
                 <Item
                   aria-label={`${schedule.type}-${schedule.title}`}
-                  backgroundColor={getColor(schedule.type)}
+                  classExtend={[getColor(schedule.type)]}
                   onClick={(e) => {
                     e.stopPropagation();
                     openModal();
@@ -95,14 +96,14 @@ export default function ScheduleItems({
                     });
                   }}
                 >
-                  {schedule.type} {schedule.id}
+                  {schedule.title}
                 </Item>
               </ItemContainer>
             ),
         )}
       {limit <= renderOrder.length ? (
         <ItemContainer top={(limit - 1) * 24} width={dateBoxSize.width - 20}>
-          <Item aria-label="" backgroundColor="bg-blue-100">
+          <Item classExtend={['bg-blue-100']}>
             <span>{hiddenRender.length}개 더보기</span>
           </Item>
         </ItemContainer>
