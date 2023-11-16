@@ -8,7 +8,9 @@ const scheduleApi = {
       .post(API.SCHEDULE_URL, { title: title || '(제목 없음)', description, type, from, until, allDay })
       .then((response: AxiosResponse) => response)
       .catch((error: AxiosError) => error),
-  delete: async () => {},
+  delete: async (id: number) => {
+    axios.delete(`${API.SCHEDULE_URL}?id=${id}`).then((response: AxiosResponse) => response);
+  },
   getMonth: async (year: number, month: number) =>
     axios
       .get(`${API.MONTH_SCHEDULE_URL}?year=${year}&month=${month}`)

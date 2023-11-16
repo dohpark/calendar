@@ -9,6 +9,9 @@ import TrashCan from '@public/svg/trash_can.svg';
 import Pencil from '@public/svg/pencil.svg';
 import { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
 import Inline from '@/components/layouts/Inline';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import scheduleApi from '@/api/schedule';
+import { useMainCalendar } from '@/store/mainCalendar';
 
 interface SelectedScheduleProps {
   style: { top: number; left: number };
@@ -17,10 +20,11 @@ interface SelectedScheduleProps {
 }
 
 function SelectedSchedule({ close, scheduleInfo, style }: SelectedScheduleProps, ref: ForwardedRef<HTMLDivElement>) {
-  const { title, from, until, description, type } = scheduleInfo;
+  const { id, title, from, until, description, type } = scheduleInfo;
 
   const startDate = new Date(from);
   const endDate = new Date(until);
+  const { selectedDate } = useMainCalendar();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -29,6 +33,15 @@ function SelectedSchedule({ close, scheduleInfo, style }: SelectedScheduleProps,
     textareaRef.current.style.height = 'auto';
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   }, [scheduleInfo.description]);
+
+  const queryClient = useQueryClient();
+  const { mutate: deleteSchedule } = useMutation({
+    mutationFn: () => scheduleApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}`] });
+      close();
+    },
+  });
 
   return (
     <div
@@ -41,7 +54,7 @@ function SelectedSchedule({ close, scheduleInfo, style }: SelectedScheduleProps,
         <button type="button" onClick={() => {}}>
           <Pencil height="20" width="20" />
         </button>
-        <button className="ml-5" type="button" onClick={() => {}}>
+        <button className="ml-5" type="button" onClick={() => deleteSchedule()}>
           <TrashCan height="20" width="20" />
         </button>
         <button className="ml-10" type="button" onClick={() => close()}>

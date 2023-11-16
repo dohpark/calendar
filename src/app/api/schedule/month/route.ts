@@ -50,6 +50,9 @@ export async function GET(req: Request) {
             },
           },
         ],
+        AND: {
+          deleted: false,
+        },
       },
     });
 
