@@ -135,6 +135,10 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
 
   const callback = useCallback(() => setIsFocus(false), []);
 
+  /**
+   * 더 보기 다이얼로그 생성 위치 계산 로직
+   * 다이얼로그의 높이와 넓이, 뷰포트의 넓이와 높이, window 기준 다이얼로그의 절대적 위치(top, left), 다이얼로그의 부모 기준 다이얼로그의 상대적 위치(top, left)를 고려하여 계산한다.
+   */
   useEffect(() => {
     if (!dateboxRef.current) return;
     if (!isFocus) return;
@@ -148,14 +152,18 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
     let { top } = dateBoxPosition;
     let { left } = dateBoxPosition;
 
+    // 만약 다이얼로그의 높이가 너무 높아 모니터 아래를 넘게 되면 화면에 안보이는만큼 위로 올린다.
     if (screenBasedTop + targetHeight > screenHeight) {
       top -= screenBasedTop + targetHeight - screenHeight + 8;
     }
 
+    // 만약 다이얼로그의 screenBasedTop이 main calendar보다 높게 생성되면 main calendar 내에 생성될 수 있게 수정한다.
+    // 헤더의 높이가 88이고 그 아래가 바로 main calendar이 존재한다.
     if (screenBasedTop < 88) {
       top += 88 - screenBasedTop;
     }
 
+    // 만약 다이얼로그가 화면 오른쪽으로 넘어가면 화면에 안보이는만큼 왼쪽으로 이동시킨다.
     if (screenBasedLeft + targetWidth > screenWidth) {
       left -= screenBasedLeft + targetWidth - screenWidth;
     }
@@ -209,6 +217,14 @@ export default function ScheduleItems({
     });
   };
 
+  /**
+   * limit은 날짜칸에 몇개의 스케줄을 표시할 수 있는지 계산한 값이다.
+   * renderOrder은 어느 스케줄을 어느 순서에 따라 생성해야하는지 로직을 담고있다. 스케줄의 아이디값을 지니며, 만약에 렌더링을 하면 안되는 빈칸의 경우 -1 값을 지닌다.
+   *
+   * renderOrder을 slice하여 렌더링할 수 있는 만큼 자른다.
+   * map을 활용하여 스케줄의 아이디의 정보를 가져온다.
+   * 받아온 정보를 활용하여 렌더링을 해야하는 스케줄들을 filter한다.
+   */
   return (
     <div key={date.valueOf()} className="relative text-gray-800">
       {renderOrder
