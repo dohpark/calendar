@@ -233,7 +233,10 @@ export default function MonthCalendar() {
     let { top } = selectedScheduleModalPosition;
 
     if (left + modalWidth > screenWidth) {
-      left = screenWidth - modalWidth - 8;
+      left = selectedScheduleModalPosition.left - (modalWidth + 20);
+    }
+    if (left < 0) {
+      left = selectedScheduleModalPosition.left + 24;
       top += 24;
     }
 
