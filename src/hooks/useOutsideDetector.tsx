@@ -4,6 +4,7 @@ interface OutsideDetecterProps {
   children: React.ReactNode;
   callback: () => void;
   classExtend?: string[];
+  style?: object;
 }
 
 function assertIsNode(e: EventTarget | null): asserts e is Node {
@@ -12,7 +13,7 @@ function assertIsNode(e: EventTarget | null): asserts e is Node {
   }
 }
 
-function OutsideDetecter({ children, callback, classExtend }: OutsideDetecterProps) {
+function OutsideDetecter({ children, callback, classExtend, style }: OutsideDetecterProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const classExtension = classExtend ? classExtend.join(' ') : '';
 
@@ -31,7 +32,7 @@ function OutsideDetecter({ children, callback, classExtend }: OutsideDetecterPro
   }, [wrapperRef, callback]);
 
   return (
-    <div ref={wrapperRef} className={`${classExtension}`}>
+    <div ref={wrapperRef} className={`${classExtension}`} style={style}>
       {children}
     </div>
   );

@@ -1,4 +1,13 @@
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import React, {
+  Dispatch,
+  ForwardedRef,
+  SetStateAction,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Schedule, ScheduleApi, ScheduleWithDateAndOrder } from '@/types/schedule';
 import OutsideDetecter from '@/hooks/useOutsideDetector';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
@@ -21,6 +30,21 @@ interface ItemContainerProps {
 
 interface ItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   classExtend?: string[];
+}
+
+interface DateBoxProps {
+  date: Date;
+  schedules: ScheduleApi[];
+  handleScheduleItemClick: (e: React.MouseEvent, schedule: ScheduleApi) => void;
+}
+
+interface SeeMoreProps {
+  limit: number;
+  dateBoxWidth: number;
+  hiddenSize: number;
+  date: Date;
+  schedules: ScheduleApi[];
+  handleScheduleItemClick: (e: React.MouseEvent, schedule: ScheduleApi) => void;
 }
 
 const getColor = (type: 'event' | 'todo') => {
@@ -58,67 +82,52 @@ function Item({ children, classExtend, ...props }: ItemProps) {
   );
 }
 
-function DateBox({
-  date,
-  schedules,
-  handleScheduleItemClick,
-}: {
-  date: Date;
-  schedules: ScheduleApi[];
-  handleScheduleItemClick: (e: React.MouseEvent, schedule: ScheduleApi) => void;
-}) {
-  const targetDate = new Date(date);
+const DateBox = forwardRef(
+  ({ date, schedules, handleScheduleItemClick }: DateBoxProps, ref: ForwardedRef<HTMLDivElement>) => {
+    const targetDate = new Date(date);
 
-  return (
-    <div
-      role="presentation"
-      onMouseDown={(e) => {
-        e.stopPropagation();
-      }}
-    >
-      <Layer gap="2" classExtend={['w-52', 'bg-white', 'rounded', 'shadow-box-2', 'p-3']}>
-        <div>
-          <div>{DAYS_OF_THE_WEEK[targetDate.getDay()]}</div>
-          <div className="text-2xl">{targetDate.getDate()}</div>
-        </div>
-        <div>
-          {schedules.map((schedule) => (
-            <div className="h-6">
-              <button
-                className={`cursor-pointer text-left align-middle px-2 rounded leading-[22px] block w-full bg-blue-200 ${getColor(
-                  schedule.type,
-                )}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleScheduleItemClick(e, schedule);
-                }}
-              >
-                {schedule.title}
-              </button>
-            </div>
-          ))}
-        </div>
-      </Layer>
-    </div>
-  );
-}
+    return (
+      <div
+        role="presentation"
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
+        ref={ref}
+      >
+        <Layer gap="2" classExtend={['w-52', 'bg-white', 'rounded', 'shadow-box-2', 'p-3']}>
+          <div>
+            <div>{DAYS_OF_THE_WEEK[targetDate.getDay()]}</div>
+            <div className="text-2xl">{targetDate.getDate()}</div>
+          </div>
+          <div>
+            {schedules.map((schedule) => (
+              <div className="h-6" key={schedule.id}>
+                <button
+                  className={`cursor-pointer text-left align-middle px-2 rounded leading-[22px] block w-full bg-blue-200 ${getColor(
+                    schedule.type,
+                  )}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleScheduleItemClick(e, schedule);
+                  }}
+                >
+                  {schedule.title}
+                </button>
+              </div>
+            ))}
+          </div>
+        </Layer>
+      </div>
+    );
+  },
+);
 
-function SeeMore({
-  limit,
-  dateBoxWidth,
-  hiddenSize,
-  date,
-  schedules,
-  handleScheduleItemClick,
-}: {
-  limit: number;
-  dateBoxWidth: number;
-  hiddenSize: number;
-  date: Date;
-  schedules: ScheduleApi[];
-  handleScheduleItemClick: (e: React.MouseEvent, schedule: ScheduleApi) => void;
-}) {
+function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleScheduleItemClick }: SeeMoreProps) {
   const [isFocus, setIsFocus] = useState(false);
+  const [dateBoxPosition, setDateBoxPosition] = useState({ top: 0, left: 0, opacity: 0 });
+  const [mounted, setMounted] = useState(false);
+
+  const dateboxRef = useRef<HTMLDivElement>(null);
 
   const handleSeeMoreClick = (e: React.MouseEvent) => {
     setIsFocus(true);
@@ -126,6 +135,36 @@ function SeeMore({
   };
 
   const callback = useCallback(() => setIsFocus(false), []);
+
+  /**
+   * currentTop은 동적으로 바뀌는 값이기에 dateBoxPosition의 값이 원치 않게 변경될 수 있음
+   * 처음 실행시 dateBoxPosition 값을 구한후 추후에 변동하지 않도록 mounted 상태값을 활용
+   */
+  useEffect(() => {
+    if (!dateboxRef.current) return;
+    if (!isFocus) return;
+    if (mounted) return;
+
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const currentTop = dateboxRef.current.getBoundingClientRect().top;
+    const currentLeft = dateboxRef.current.getBoundingClientRect().left;
+    const targetHeight = dateboxRef.current.offsetHeight;
+    const targetWidth = dateboxRef.current.offsetWidth;
+    let top = -28;
+    let left = 0;
+
+    if (currentTop + targetHeight > screenHeight) {
+      top = -(currentTop + targetHeight - screenHeight + 8);
+    }
+
+    if (currentLeft + targetWidth > screenWidth) {
+      left = -(currentLeft + targetWidth - screenWidth);
+    }
+
+    setDateBoxPosition({ left, top, opacity: 100 });
+    setMounted(true);
+  }, [isFocus]);
 
   return (
     <div>
@@ -135,8 +174,13 @@ function SeeMore({
         </Item>
       </ItemContainer>
       {isFocus ? (
-        <OutsideDetecter callback={callback} classExtend={['absolute', '-top-7', 'left-0', 'z-20']}>
-          <DateBox date={date} schedules={schedules} handleScheduleItemClick={handleScheduleItemClick} />
+        <OutsideDetecter callback={callback} classExtend={['absolute', 'z-20']} style={dateBoxPosition}>
+          <DateBox
+            ref={dateboxRef}
+            date={date}
+            schedules={schedules}
+            handleScheduleItemClick={handleScheduleItemClick}
+          />
         </OutsideDetecter>
       ) : null}
     </div>
