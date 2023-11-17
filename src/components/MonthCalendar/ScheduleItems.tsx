@@ -124,8 +124,7 @@ const DateBox = forwardRef(
 
 function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleScheduleItemClick }: SeeMoreProps) {
   const [isFocus, setIsFocus] = useState(false);
-  const [dateBoxPosition, setDateBoxPosition] = useState({ top: 0, left: 0, opacity: 0 });
-  const [mounted, setMounted] = useState(false);
+  const [dateBoxPosition, setDateBoxPosition] = useState({ top: -28, left: 0, opacity: 0 });
 
   const dateboxRef = useRef<HTMLDivElement>(null);
 
@@ -136,34 +135,28 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
 
   const callback = useCallback(() => setIsFocus(false), []);
 
-  /**
-   * currentTop은 동적으로 바뀌는 값이기에 dateBoxPosition의 값이 원치 않게 변경될 수 있음
-   * 처음 실행시 dateBoxPosition 값을 구한후 추후에 변동하지 않도록 mounted 상태값을 활용
-   */
   useEffect(() => {
     if (!dateboxRef.current) return;
     if (!isFocus) return;
-    if (mounted) return;
 
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
-    const currentTop = dateboxRef.current.getBoundingClientRect().top;
-    const currentLeft = dateboxRef.current.getBoundingClientRect().left;
+    const screenBasedTop = dateboxRef.current.getBoundingClientRect().top;
+    const screenBasedLeft = dateboxRef.current.getBoundingClientRect().left;
     const targetHeight = dateboxRef.current.offsetHeight;
     const targetWidth = dateboxRef.current.offsetWidth;
-    let top = -28;
-    let left = 0;
+    let { top } = dateBoxPosition;
+    let { left } = dateBoxPosition;
 
-    if (currentTop + targetHeight > screenHeight) {
-      top = -(currentTop + targetHeight - screenHeight + 8);
+    if (screenBasedTop + targetHeight > screenHeight) {
+      top -= screenBasedTop + targetHeight - screenHeight + 8;
     }
 
-    if (currentLeft + targetWidth > screenWidth) {
-      left = -(currentLeft + targetWidth - screenWidth);
+    if (screenBasedLeft + targetWidth > screenWidth) {
+      left -= screenBasedLeft + targetWidth - screenWidth;
     }
 
     setDateBoxPosition({ left, top, opacity: 100 });
-    setMounted(true);
   }, [isFocus]);
 
   return (
