@@ -152,6 +152,10 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
       top -= screenBasedTop + targetHeight - screenHeight + 8;
     }
 
+    if (screenBasedTop < 88) {
+      top += 88 - screenBasedTop;
+    }
+
     if (screenBasedLeft + targetWidth > screenWidth) {
       left -= screenBasedLeft + targetWidth - screenWidth;
     }
