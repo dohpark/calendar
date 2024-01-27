@@ -138,6 +138,7 @@ export default function Header() {
                 'grid',
                 'py-2',
                 'w-44',
+                'z-50',
               ]}
               ItemComponent={CalendarUnitListItem}
               onClick={handleDropdown}
@@ -151,7 +152,7 @@ export default function Header() {
           </nav>
         </Inline>
       </Split>
-      <div className="absolute z-10 top-20 left-2">
+      <div className="absolute z-50 top-20 left-2">
         <IconButton
           aria-label="create event / todo button"
           classExtend={['p-2', 'shadow-box-1']}
@@ -178,6 +179,7 @@ export default function Header() {
             'grid',
             'py-2',
             'w-36',
+            'z-50',
           ]}
           ItemComponent={CalendarCreateListItem}
           onClick={handleCreateDropdown}
