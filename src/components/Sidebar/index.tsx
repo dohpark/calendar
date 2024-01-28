@@ -1,6 +1,6 @@
 'use client';
 
-import Layer from '@/components/layouts/Layer';
+import Layer from '@/components/shared/layouts/Layer';
 import { useMainCalendar } from '@/store/mainCalendar';
 import MiniCalendar from '@/components//MiniCalendar';
 

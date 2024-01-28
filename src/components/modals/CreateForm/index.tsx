@@ -1,9 +1,9 @@
 import { Dispatch, FormEvent, ForwardedRef, SetStateAction, forwardRef, useRef, useState } from 'react';
-import Layer from '@/components/layouts/Layer';
+import Layer from '@/components/shared/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
-import TextButton from '@/components/common/TextButton';
+import TextButton from '@/components/shared/TextButton';
 import { useMainCalendar } from '@/store/mainCalendar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';

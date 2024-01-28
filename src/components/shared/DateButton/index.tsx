@@ -1,4 +1,4 @@
-import IconButton from '@/components/common/IconButton';
+import IconButton from '@/components/shared/IconButton';
 
 interface DateButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   year: number;

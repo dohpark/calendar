@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Inline from '@/components/layouts/Inline';
-import Split from '@/components/layouts/Split';
-import IconButton from '@/components/common/IconButton';
-import TextButton from '@/components/common/TextButton';
-import ListBox from '@/components/common/ListBox';
+import Inline from '@/components/shared/layouts/Inline';
+import Split from '@/components/shared/layouts/Split';
+import IconButton from '@/components/shared/IconButton';
+import TextButton from '@/components/shared/TextButton';
+import ListBox from '@/components/shared/ListBox';
 import Calendar from '@public/svg/calendar.svg';
 import Hamburger from '@public/svg/hamburger.svg';
 import Left from '@public/svg/left.svg';

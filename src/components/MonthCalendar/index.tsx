@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMainCalendar } from '@/store/mainCalendar';
-import DateButton from '@/components/common/DateButton';
+import DateButton from '@/components/shared/DateButton';
 import { countDaysInMonthCalendar, countWeeksInMonthCalendar } from '@/utils/calendar';
 import useModal from '@/hooks/useModal';
 import CreateForm from '@/components/modals/CreateForm';

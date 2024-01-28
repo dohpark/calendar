@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import Inline from '@/components/layouts/Inline';
-import Layer from '@/components/layouts/Layer';
-import Split from '@/components/layouts/Split';
-import IconButton from '@/components/common/IconButton';
-import DateButton from '@/components/common/DateButton';
+import Inline from '@/components/shared/layouts/Inline';
+import Layer from '@/components/shared/layouts/Layer';
+import Split from '@/components/shared/layouts/Split';
+import IconButton from '@/components/shared/IconButton';
+import DateButton from '@/components/shared/DateButton';
 import Left from '@public/svg/left.svg';
 import Right from '@public/svg/right.svg';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';

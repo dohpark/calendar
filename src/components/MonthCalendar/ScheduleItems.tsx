@@ -11,7 +11,7 @@ import React, {
 import { Schedule, ScheduleApi, ScheduleWithDateAndOrder } from '@/types/schedule';
 import OutsideDetecter from '@/hooks/useOutsideDetector';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
-import Layer from '../layouts/Layer';
+import Layer from '../shared/layouts/Layer';
 
 interface SchedulesProps {
   data: ScheduleWithDateAndOrder;

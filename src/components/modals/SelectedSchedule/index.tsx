@@ -1,4 +1,4 @@
-import Layer from '@/components/layouts/Layer';
+import Layer from '@/components/shared/layouts/Layer';
 import LayerItem from '@/components/modals/LayerItem';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 import { Schedule } from '@/types/schedule';
@@ -8,7 +8,7 @@ import Time from '@public/svg/time.svg';
 import TrashCan from '@public/svg/trash_can.svg';
 import Pencil from '@public/svg/pencil.svg';
 import { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
-import Inline from '@/components/layouts/Inline';
+import Inline from '@/components/shared/layouts/Inline';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import { useMainCalendar } from '@/store/mainCalendar';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import OutsideDetecter from '@/hooks/useOutsideDetector';
-import ListBox from '@/components/common/ListBox';
+import ListBox from '@/components/shared/ListBox';
 import { createTimeItems, getTimeDisplay } from '@/utils/calendar';
 import TimeListItem from './TimeListItem';
 
