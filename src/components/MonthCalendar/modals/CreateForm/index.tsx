@@ -1,4 +1,4 @@
-import { Dispatch, FormEvent, ForwardedRef, SetStateAction, forwardRef, useRef, useState } from 'react';
+import { FormEvent, ForwardedRef, forwardRef, useRef, useState } from 'react';
 import Layer from '@/components/shared/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
@@ -8,26 +8,24 @@ import { useMainCalendar } from '@/store/mainCalendar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import { CreateSchedule } from '@/types/schedule';
-import LayerItem from '@/components/modals/LayerItem';
+import LayerItem from '@/components/MonthCalendar/modals/LayerItem';
+import { useMonthCalendar } from '@/store/monthCalendar';
 import CalendarInput from './CalendarInput';
 import TimeInput from './TimeInput';
 
-interface DragState {
-  start: Date;
-  end: Date;
-}
-
 interface CreateFormProps {
   style?: object;
-  dragDate: DragState;
-  setDragDate: Dispatch<SetStateAction<DragState>>;
   closeModal: () => void;
 }
 
-function CreateForm(
-  { style = {}, dragDate, setDragDate, closeModal }: CreateFormProps,
-  ref: ForwardedRef<HTMLFormElement>,
-) {
+function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedRef<HTMLFormElement>) {
+  const {
+    calendar: { dragDate },
+    actions: {
+      calendar: { setDragDate },
+    },
+  } = useMonthCalendar();
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [form, setForm] = useState<CreateSchedule>({
     type: 'event',
@@ -59,7 +57,7 @@ function CreateForm(
 
   const setEventEndDate = (targetDate: Date) => {
     setForm((prevForm) => ({ ...prevForm, until: targetDate }));
-    setDragDate((prevDate) => ({ ...prevDate, end: targetDate }));
+    setDragDate({ end: targetDate });
   };
 
   const initTodo = () => {

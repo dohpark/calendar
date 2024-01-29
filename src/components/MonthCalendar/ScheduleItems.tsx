@@ -1,24 +1,13 @@
-import React, {
-  Dispatch,
-  ForwardedRef,
-  SetStateAction,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { Schedule, ScheduleApi, ScheduleWithDateAndOrder } from '@/types/schedule';
+import React, { ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { ScheduleApi, ScheduleWithDateAndOrder } from '@/types/schedule';
 import OutsideDetecter from '@/hooks/useOutsideDetector';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
+import { useMonthCalendar } from '@/store/monthCalendar';
 import Layer from '../shared/layouts/Layer';
 
 interface SchedulesProps {
   data: ScheduleWithDateAndOrder;
-  dateBoxSize: { width: number; height: number };
   openModal: () => void;
-  setSelectedScheduleInfo: Dispatch<SetStateAction<Schedule>>;
-  setSelectedScheduleModalPosition: Dispatch<SetStateAction<{ top: number; left: number; width: number }>>;
 }
 
 interface ItemContainerProps {
@@ -192,14 +181,12 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
   );
 }
 
-export default function ScheduleItems({
-  data,
-  dateBoxSize,
-  openModal,
-  setSelectedScheduleInfo,
-  setSelectedScheduleModalPosition,
-}: SchedulesProps) {
+export default function ScheduleItems({ data, openModal }: SchedulesProps) {
   const { date, renderOrder, schedules, hiddenRender } = data;
+  const {
+    actions,
+    calendar: { dateBoxSize },
+  } = useMonthCalendar();
 
   const getOrder = (id: number) => renderOrder.indexOf(id);
 
@@ -207,10 +194,10 @@ export default function ScheduleItems({
 
   const handleScheduleItemClick = (e: React.MouseEvent, schedule: ScheduleApi) => {
     openModal();
-    setSelectedScheduleInfo(schedule);
+    actions.selectedScheduleModal.setInfo(schedule);
 
     const eventTarget = e.target as HTMLButtonElement;
-    setSelectedScheduleModalPosition({
+    actions.selectedScheduleModal.setPosition({
       left: eventTarget.getBoundingClientRect().left,
       top: eventTarget.getBoundingClientRect().top,
       width: eventTarget.offsetWidth,

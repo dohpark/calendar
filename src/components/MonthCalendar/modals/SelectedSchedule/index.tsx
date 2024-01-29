@@ -1,7 +1,6 @@
 import Layer from '@/components/shared/layouts/Layer';
-import LayerItem from '@/components/modals/LayerItem';
+import LayerItem from '@/components/MonthCalendar/modals/LayerItem';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
-import { Schedule } from '@/types/schedule';
 import Close from '@public/svg/close.svg';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
@@ -12,15 +11,19 @@ import Inline from '@/components/shared/layouts/Inline';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import { useMainCalendar } from '@/store/mainCalendar';
+import { useMonthCalendar } from '@/store/monthCalendar';
 
 interface SelectedScheduleProps {
   style: { top: number; left: number };
   close: () => void;
-  scheduleInfo: Schedule;
 }
 
-function SelectedSchedule({ close, scheduleInfo, style }: SelectedScheduleProps, ref: ForwardedRef<HTMLDivElement>) {
-  const { id, title, from, until, description, type } = scheduleInfo;
+function SelectedSchedule({ close, style }: SelectedScheduleProps, ref: ForwardedRef<HTMLDivElement>) {
+  const {
+    selectedScheduleModal: {
+      info: { id, title, from, until, description, type },
+    },
+  } = useMonthCalendar();
 
   const startDate = new Date(from);
   const endDate = new Date(until);
@@ -32,7 +35,7 @@ function SelectedSchedule({ close, scheduleInfo, style }: SelectedScheduleProps,
     if (!textareaRef.current) return;
     textareaRef.current.style.height = 'auto';
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-  }, [scheduleInfo.description]);
+  }, [description]);
 
   const queryClient = useQueryClient();
   const { mutate: deleteSchedule } = useMutation({

@@ -26,6 +26,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'react/require-default-props': 'off',
     'react-hooks/exhaustive-deps': 'off',
+    'no-param-reassign': 0,
     'jsx-a11y/label-has-associated-control': [
       2,
       {
