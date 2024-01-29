@@ -161,7 +161,7 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
   }, [isFocus]);
 
   return (
-    <div>
+    <>
       <ItemContainer top={(limit - 1) * 24} left={8} width={dateBoxWidth - 20}>
         <Item classExtend={['bg-blue-100']} onClick={handleSeeMoreClick}>
           <span>{hiddenSize}개 더보기</span>
@@ -177,12 +177,12 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
           />
         </OutsideDetecter>
       ) : null}
-    </div>
+    </>
   );
 }
 
 export default function ScheduleItems({ data, openModal }: SchedulesProps) {
-  const { date, renderOrder, schedules, hiddenRender } = data;
+  const { date, renderOrder, schedules } = data;
   const {
     actions,
     calendar: { dateBoxSize },
@@ -203,6 +203,8 @@ export default function ScheduleItems({ data, openModal }: SchedulesProps) {
       width: eventTarget.offsetWidth,
     });
   };
+
+  const hiddenRenderItems = renderOrder.slice(limit - 1).filter((id) => id !== -1);
 
   /**
    * limit은 날짜칸에 몇개의 스케줄을 표시할 수 있는지 계산한 값이다.
@@ -244,7 +246,7 @@ export default function ScheduleItems({ data, openModal }: SchedulesProps) {
         <SeeMore
           limit={limit}
           dateBoxWidth={dateBoxSize.width}
-          hiddenSize={hiddenRender.length}
+          hiddenSize={hiddenRenderItems.length}
           date={date}
           schedules={schedules}
           handleScheduleItemClick={handleScheduleItemClick}

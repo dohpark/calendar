@@ -19,7 +19,6 @@ export type ScheduleWithDateAndOrder = {
   date: Date;
   renderOrder: number[];
   schedules: ScheduleApi[];
-  hiddenRender: number[];
 };
 export type ScheduleArray = ScheduleWithDateAndOrder[];
 export type ScheduleArrayApi = { selectedMonthArray: ScheduleArray };
