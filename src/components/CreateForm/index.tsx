@@ -1,15 +1,15 @@
-import { FormEvent, ForwardedRef, forwardRef, useRef, useState } from 'react';
+import { FormEvent, ForwardedRef, forwardRef, useEffect, useRef } from 'react';
 import Layer from '@/components/shared/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
 import TextButton from '@/components/shared/TextButton';
-import { useMainCalendar } from '@/store/mainCalendar';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
-import { CreateSchedule } from '@/types/schedule';
-import LayerItem from '@/components/MonthCalendar/modals/LayerItem';
-import { useMonthCalendar } from '@/store/monthCalendar';
+import LayerItem from '@/components/shared/LayerItem';
+import { useMonthCalendarStore } from '@/store/monthCalendar';
+import { useCreateFormStore } from '@/store/createForm';
 import CalendarInput from './CalendarInput';
 import TimeInput from './TimeInput';
 
@@ -21,26 +21,28 @@ interface CreateFormProps {
 function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedRef<HTMLFormElement>) {
   const {
     calendar: { dragDate },
-    actions: {
-      calendar: { setDragDate },
-    },
-  } = useMonthCalendar();
+    actions: { setDragDate },
+  } = useMonthCalendarStore();
+
+  const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
+  const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [form, setForm] = useState<CreateSchedule>({
-    type: 'event',
-    title: '',
-    description: null,
-    from: dragDate.start < dragDate.end ? dragDate.start : dragDate.end,
-    until: dragDate.start > dragDate.end ? dragDate.start : dragDate.end,
-    allDay: true,
-  });
 
-  const { selectedDate, actions } = useMainCalendar();
+  useEffect(() => {
+    createFormActions.setForm({
+      type: 'event',
+      title: '',
+      description: null,
+      from: dragDate.start < dragDate.end ? dragDate.start : dragDate.end,
+      until: dragDate.start > dragDate.end ? dragDate.start : dragDate.end,
+      allDay: true,
+    });
+  }, []);
 
   const queryClient = useQueryClient();
   const { mutate: createSchedule } = useMutation({
-    mutationFn: () => scheduleApi.create(form),
+    mutationFn: () => scheduleApi.create(createForm.form),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}`] });
       closeModal();
@@ -48,48 +50,54 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
   });
 
   const setEventStartDate = (targetDate: Date) => {
-    setForm((prevForm) => ({ ...prevForm, from: targetDate }));
-    if (targetDate.getFullYear() !== form.from.getFullYear() || targetDate.getMonth() !== form.from.getMonth()) {
-      actions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
+    createFormActions.setForm({ from: targetDate });
+    if (
+      targetDate.getFullYear() !== createForm.form.from.getFullYear() ||
+      targetDate.getMonth() !== createForm.form.from.getMonth()
+    ) {
+      mainCalendarActions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
     }
-    setDragDate({ start: targetDate, end: form.until });
+    setDragDate({ start: targetDate, end: createForm.form.until });
   };
 
   const setEventEndDate = (targetDate: Date) => {
-    setForm((prevForm) => ({ ...prevForm, until: targetDate }));
+    createFormActions.setForm({ until: targetDate });
     setDragDate({ end: targetDate });
   };
 
   const initTodo = () => {
-    setForm((prevForm) => ({ ...prevForm, until: form.from, type: 'todo' }));
-    setDragDate({ start: form.from, end: form.from });
+    createFormActions.setForm({ until: createForm.form.from, type: 'todo' });
+    setDragDate({ start: createForm.form.from, end: createForm.form.from });
   };
 
   const setTodoDate = (targetDate: Date) => {
-    setForm((prevForm) => ({ ...prevForm, from: targetDate, until: targetDate }));
+    createFormActions.setForm({ from: targetDate, until: targetDate });
     setDragDate({ start: targetDate, end: targetDate });
-    if (targetDate.getFullYear() !== form.from.getFullYear() || targetDate.getMonth() !== form.from.getMonth()) {
-      actions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
+    if (
+      targetDate.getFullYear() !== createForm.form.from.getFullYear() ||
+      targetDate.getMonth() !== createForm.form.from.getMonth()
+    ) {
+      mainCalendarActions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
     }
   };
 
   const setDescription = (description: string) => {
-    setForm((prevForm) => ({ ...prevForm, description }));
+    createFormActions.setForm({ description });
   };
 
   const setTodoTime = (hour: number, minute: number) => {
-    const targetDate = new Date(form.from);
+    const targetDate = new Date(createForm.form.from);
     targetDate.setHours(hour, minute);
-    setForm((prevForm) => ({ ...prevForm, from: targetDate }));
+    createFormActions.setForm({ from: targetDate });
   };
 
   const startDisabledFilterCallback = (date: Date) => {
-    if (date > form.until) return true;
+    if (date > createForm.form.until) return true;
     return false;
   };
 
   const endDisabledFilterCallback = (date: Date) => {
-    if (date < form.from) return true;
+    if (date < createForm.form.from) return true;
     return false;
   };
 
@@ -116,8 +124,8 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
           <input
             placeholder="제목"
             className="border-b-2 w-full p-1 text-lg outline-none"
-            value={form.title}
-            onChange={(e) => setForm((prevForm) => ({ ...prevForm, title: e.target.value }))}
+            value={createForm.form.title}
+            onChange={(e) => createFormActions.setForm({ title: e.target.value })}
           />
         </LayerItem>
         <LayerItem>
@@ -126,8 +134,8 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
             type="radio"
             id="event"
             value="event"
-            checked={form.type === 'event'}
-            onChange={() => setForm((prevForm) => ({ ...prevForm, type: 'event' }))}
+            checked={createForm.form.type === 'event'}
+            onChange={() => createFormActions.setForm({ type: 'event' })}
           />
           <label
             className="text-sm px-3 py-1 mr-2 leading-7 cursor-pointer rounded hover:bg-zinc-100 peer-checked/event:bg-blue-100 peer-checked/event:text-blue-500"
@@ -141,7 +149,7 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
             type="radio"
             id="todo"
             value="todo"
-            checked={form.type === 'todo'}
+            checked={createForm.form.type === 'todo'}
             onChange={() => initTodo()}
           />
           <label
@@ -152,12 +160,12 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
           </label>
         </LayerItem>
         <LayerItem Icon={Time}>
-          {form.type === 'event' ? (
+          {createForm.form.type === 'event' ? (
             <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
               <span className="relative" aria-label="event start date">
                 <CalendarInput
                   label="start date"
-                  date={form.from}
+                  date={createForm.form.from}
                   setDate={setEventStartDate}
                   disabledFilterCallback={startDisabledFilterCallback}
                 />
@@ -166,22 +174,22 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
               <span className="relative" aria-label="event end date">
                 <CalendarInput
                   label="end date"
-                  date={form.until}
+                  date={createForm.form.until}
                   setDate={setEventEndDate}
                   disabledFilterCallback={endDisabledFilterCallback}
                 />
               </span>
             </div>
           ) : null}
-          {form.type === 'todo' ? (
+          {createForm.form.type === 'todo' ? (
             <div className="self-center text-sm">
               <div role="presentation" aria-label="create form selected date">
                 <span className="relative" aria-label="todo start date">
-                  <CalendarInput label="start date" date={form.from} setDate={setTodoDate} />
+                  <CalendarInput label="start date" date={createForm.form.from} setDate={setTodoDate} />
                 </span>
-                {!form.allDay ? (
+                {!createForm.form.allDay ? (
                   <span className="ml-3 relative">
-                    <TimeInput date={form.from} setTime={setTodoTime} />
+                    <TimeInput date={createForm.form.from} setTime={setTodoTime} />
                   </span>
                 ) : null}
               </div>
@@ -190,8 +198,8 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
                   type="checkbox"
                   id="allday"
                   className="w-4 h-4 mr-2"
-                  checked={form.allDay}
-                  onChange={() => setForm((prevForm) => ({ ...prevForm, allDay: !prevForm.allDay }))}
+                  checked={createForm.form.allDay}
+                  onChange={() => createFormActions.toggleAllDay()}
                 />
                 <label htmlFor="allday">종일</label>
               </div>
@@ -202,7 +210,7 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
           <textarea
             ref={textareaRef}
             rows={3}
-            value={form.description || ''}
+            value={createForm.form.description || ''}
             placeholder="설명 추가"
             className="w-full p-2 text-sm outline-none bg-gray-100 text-gray-700 rounded-sm resize-none"
             onChange={(e) => {

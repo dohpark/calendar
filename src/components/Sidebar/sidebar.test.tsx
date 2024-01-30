@@ -1,6 +1,6 @@
 import { act, render, renderHook, screen, waitFor, within } from '@/test-utils/testingLibrary';
 import userEvent from '@testing-library/user-event';
-import { useMainCalendar } from '@/store/mainCalendar';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 import Home from '@/app/page';
 import TestingQueryClientProvider from '@/test-utils/TestingQueryClientProvider';
 
@@ -9,7 +9,7 @@ test('미니달력에서 날짜를 선택시 메인달력에서 선택 날짜가
   render(<Home />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 12월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 28)));
 
   // 미니달력에 왼쪽 버튼 클릭하여 전달로 이동
@@ -39,7 +39,7 @@ test('헤더에서 왼쪽 및 오른쪽 버튼을 클릭을 통한 날짜 선택
   render(<Home />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 12월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 28)));
 
   // 헤더의 왼쪽 버튼 클릭 시 전 달로 이동

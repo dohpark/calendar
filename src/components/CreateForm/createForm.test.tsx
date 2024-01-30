@@ -1,6 +1,6 @@
 import { render, renderHook, screen, act, fireEvent, within } from '@/test-utils/testingLibrary';
 import MonthCalendar from '@/components/MonthCalendar';
-import { useMainCalendar } from '@/store/mainCalendar';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 import userEvent from '@testing-library/user-event';
 import TestingQueryClientProvider from '@/test-utils/TestingQueryClientProvider';
 
@@ -8,7 +8,7 @@ test('월 달력에서 드래그를 통해 여러 날을 선택하면 이벤트 
   render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 28)));
 
   // 10월 5일에서 10월 11일까지 마우스 드래그
@@ -37,7 +37,7 @@ test('월 달력에서 이벤트 생성시 타입을 할일로 선택하면 하�
   render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 28)));
 
   // 10월 5일에서 10월 11일까지 마우스 드래그
@@ -67,7 +67,7 @@ test('이벤트 생성 타입을 할일로 선택하면 시간을 선택하거�
   render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 28)));
 
   // 10월 5일에서 10월 11일까지 마우스 드래그
@@ -105,7 +105,7 @@ test('모달에서 날짜 선택 수정시 메인 달력에 반영된다. (메�
   render(<MonthCalendar />, { wrapper: TestingQueryClientProvider });
 
   // 2023년 10월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 28)));
 
   // 10월 5일에서 10월 11일까지 마우스 드래그

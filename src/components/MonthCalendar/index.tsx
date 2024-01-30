@@ -1,19 +1,21 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useMainCalendar } from '@/store/mainCalendar';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 import DateButton from '@/components/shared/DateButton';
 import { countDaysInMonthCalendar } from '@/utils/calendar';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
-import { useMonthCalendar } from '@/store/monthCalendar';
+import { useMonthCalendarStore } from '@/store/monthCalendar';
+import { useCreateFormStore } from '@/store/createForm';
 import ScheduleItems from './ScheduleItems';
 import useMonthData from './hooks/useMonthData';
 import useSelectedScheduleModal from './hooks/useSelectedScheduleModal';
 import useCreateFormModal from './hooks/useCreateFormModal';
 
 export default function MonthCalendar() {
-  const { selectedDate, actions: mainCalendarActions } = useMainCalendar();
-  const { calendar, actions: monthCalendarActions } = useMonthCalendar();
+  const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
+  const { calendar, actions: monthCalendarActions } = useMonthCalendarStore();
+  const { actions: createFormActions } = useCreateFormStore();
 
   const dateContainerRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +50,7 @@ export default function MonthCalendar() {
     const element = Array.from(dateContainerRef.current.children)[0] as HTMLDivElement;
 
     const observer = new ResizeObserver(() => {
-      monthCalendarActions.calendar.setDateBoxSize({
+      monthCalendarActions.setDateBoxSize({
         width: element.offsetWidth,
         height: element.offsetHeight,
       });
@@ -73,7 +75,7 @@ export default function MonthCalendar() {
     const dragStartElement = Array.from(dateContainerRef.current.children)[dragStartIndex] as HTMLDivElement;
     const dragEndElement = Array.from(dateContainerRef.current.children)[dragEndIndex] as HTMLDivElement;
 
-    monthCalendarActions.createFormModal.setPosition({
+    createFormActions.setPosition({
       top:
         (dragStartElement.getBoundingClientRect().top +
           dragEndElement.getBoundingClientRect().top +
@@ -132,15 +134,14 @@ export default function MonthCalendar() {
             key={`${year}-${month}-${date}`}
             aria-label={`${year}-${month}-${date}-cell`}
             onMouseDown={() => {
-              monthCalendarActions.calendar.setDragDate({
+              monthCalendarActions.setDragDate({
                 start: new Date(year, month - 1, date),
                 end: new Date(year, month - 1, date),
               });
-              monthCalendarActions.calendar.setMouseDown(true);
+              monthCalendarActions.setMouseDown(true);
             }}
             onMouseEnter={() => {
-              if (calendar.mouseDown)
-                monthCalendarActions.calendar.setDragDate({ end: new Date(year, month - 1, date) });
+              if (calendar.mouseDown) monthCalendarActions.setDragDate({ end: new Date(year, month - 1, date) });
             }}
             onMouseUp={() => {
               if (calendar.mouseDown) openCreateFormModal();

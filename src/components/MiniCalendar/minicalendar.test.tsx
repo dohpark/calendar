@@ -1,11 +1,11 @@
 import { act, render, renderHook, screen } from '@/test-utils/testingLibrary';
 import MiniCalendar from '@/components/MiniCalendar';
 import userEvent from '@testing-library/user-event';
-import { useMainCalendar } from '@/store/mainCalendar';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 
 test('선택 날짜의 월을 디폴트로 보인다.', () => {
   // 2023년 10월 18일로 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 18)));
 
   render(
@@ -18,7 +18,7 @@ test('선택 날짜의 월을 디폴트로 보인다.', () => {
 
 test('미니달력에서 오늘 날짜의 배경색은 blue500이다.', () => {
   // default로 오늘날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
 
   render(
     <MiniCalendar selectedDate={result.current.selectedDate} selectDate={result.current.actions.setSelectedDate} />,
@@ -39,7 +39,7 @@ test('미니달력에서 오늘 날짜의 배경색은 blue500이다.', () => {
 
 test('미니달력에서 선택한 날짜의 배경색은 blue200이다.', async () => {
   // 2023년 10월 18일로 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 18)));
 
   const user = userEvent.setup();
@@ -57,7 +57,7 @@ test('미니달력에서 선택한 날짜의 배경색은 blue200이다.', async
 
 test('지난달과 다음달의 날짜의 색상은 gray400이다. 현재 달의 날짜의 색상은 gray600이다.', () => {
   // 2023년 11월 28일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 10, 28)));
 
   render(
@@ -79,7 +79,7 @@ test('지난달과 다음달의 날짜의 색상은 gray400이다. 현재 달의
 
 test('미니달력의 왼쪽 버튼을 클릭 시 전달로 넘어간다.', async () => {
   // 2024년 1월 15일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2024, 0, 15)));
 
   const user = userEvent.setup();
@@ -98,7 +98,7 @@ test('미니달력의 왼쪽 버튼을 클릭 시 전달로 넘어간다.', asyn
 
 test('미니달력의 오른쪽 버튼을 클릭 시 다음달로 넘어간다.', async () => {
   // 2023년 12월 15일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 15)));
 
   const user = userEvent.setup();
@@ -116,7 +116,7 @@ test('미니달력의 오른쪽 버튼을 클릭 시 다음달로 넘어간다.'
 
 test('미니달력에 filter callback 함수를 주어 disable 할 날짜들을 정할 수 있다.', () => {
   // 2023년 12월 15일로 날짜 설정
-  const { result } = renderHook(() => useMainCalendar());
+  const { result } = renderHook(() => useMainCalendarStore());
   act(() => result.current.actions.setSelectedDate(new Date(2023, 11, 15)));
 
   // 2023년 12월 15일 이후의 날들은 disable

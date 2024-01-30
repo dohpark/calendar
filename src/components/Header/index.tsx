@@ -12,7 +12,7 @@ import Left from '@public/svg/left.svg';
 import Right from '@public/svg/right.svg';
 import DropDown from '@public/svg/drop_down.svg';
 import CalendarUnitListItem from '@/components/Header/CalendarUnitListItem';
-import { useMainCalendar } from '@/store/mainCalendar';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 import { CalendarUnitEngType, CalendarUnitKorType } from '@/types/calendar';
 import { getDisplayedDateWeekUnit } from '@/utils/calendar';
 import { CalendarUnitListItemType } from './types';
@@ -20,7 +20,7 @@ import { CalendarUnitListItemType } from './types';
 export default function Header() {
   const [isDropdownHidden, setIsDropdownHidden] = useState(true);
 
-  const { selectedDate, calendarUnit, actions } = useMainCalendar();
+  const { selectedDate, calendarUnit, actions } = useMainCalendarStore();
 
   const getDisplayedDate = (unit: CalendarUnitEngType) => {
     const year = selectedDate.getFullYear();

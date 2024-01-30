@@ -2,7 +2,8 @@ import React, { ForwardedRef, forwardRef, useCallback, useEffect, useRef, useSta
 import { ScheduleApi, ScheduleWithDateAndOrder } from '@/types/schedule';
 import OutsideDetecter from '@/hooks/useOutsideDetector';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
-import { useMonthCalendar } from '@/store/monthCalendar';
+import { useMonthCalendarStore } from '@/store/monthCalendar';
+import { useSelectedScheduleStore } from '@/store/selectedSchedule';
 import Layer from '../shared/layouts/Layer';
 
 interface SchedulesProps {
@@ -184,9 +185,9 @@ function SeeMore({ limit, dateBoxWidth, hiddenSize, date, schedules, handleSched
 export default function ScheduleItems({ data, openModal }: SchedulesProps) {
   const { date, renderOrder, schedules } = data;
   const {
-    actions,
     calendar: { dateBoxSize },
-  } = useMonthCalendar();
+  } = useMonthCalendarStore();
+  const { actions: selectedScheduleActions } = useSelectedScheduleStore();
 
   const getOrder = (id: number) => renderOrder.indexOf(id);
 
@@ -194,10 +195,10 @@ export default function ScheduleItems({ data, openModal }: SchedulesProps) {
 
   const handleScheduleItemClick = (e: React.MouseEvent, schedule: ScheduleApi) => {
     openModal();
-    actions.selectedScheduleModal.setInfo(schedule);
+    selectedScheduleActions.setInfo(schedule);
 
     const eventTarget = e.target as HTMLButtonElement;
-    actions.selectedScheduleModal.setPosition({
+    selectedScheduleActions.setPosition({
       left: eventTarget.getBoundingClientRect().left,
       top: eventTarget.getBoundingClientRect().top,
       width: eventTarget.offsetWidth,

@@ -1,9 +1,10 @@
 import { RefObject, useEffect, useMemo, useRef } from 'react';
 
 import useModal from '@/hooks/useModal';
-import CreateForm from '@/components/MonthCalendar/modals/CreateForm';
+import CreateForm from '@/components/CreateForm';
 import { countWeeksInMonthCalendar } from '@/utils/calendar';
-import { useMonthCalendar } from '@/store/monthCalendar';
+import { useMonthCalendarStore } from '@/store/monthCalendar';
+import { useCreateFormStore } from '@/store/createForm';
 
 /**
  * createFormModal 상태관리 훅
@@ -15,7 +16,8 @@ export default function useCreateFormModal({
   selectedDate: Date;
   dateContainerRef: RefObject<HTMLDivElement>;
 }) {
-  const { calendar, createFormModal, actions } = useMonthCalendar();
+  const { calendar, actions: monthCalendarActions } = useMonthCalendarStore();
+  const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const createFormModalRef = useRef<HTMLFormElement>(null);
 
@@ -25,9 +27,9 @@ export default function useCreateFormModal({
     Array.from(dateContainerRef.current.children).forEach((target) => {
       target.classList.remove('bg-blue-50');
     });
-    actions.calendar.setMouseDown(false);
-    actions.createFormModal.setMount(false);
-    actions.createFormModal.setStyle({ opacity: 0 });
+    monthCalendarActions.setMouseDown(false);
+    createFormActions.setMount(false);
+    createFormActions.setStyle({ opacity: 0 });
   };
 
   const { openModal, ModalPortal, modalOpen, closeModal } = useModal({ reset: resetDrag });
@@ -35,7 +37,7 @@ export default function useCreateFormModal({
   // 스케줄 생성 모달 생성 위치 계산
   useEffect(() => {
     if (!modalOpen) return;
-    if (createFormModal.mounted) return;
+    if (createForm.mounted) return;
     if (!dateContainerRef.current) return;
     if (!createFormModalRef.current) return;
 
@@ -44,16 +46,16 @@ export default function useCreateFormModal({
     const screenWidth = calendar.dateBoxSize.width * 7 + 256;
     const screenHeight = calendar.dateBoxSize.height * countWeeksInMonthCalendar(selectedDate) + 88;
 
-    let left = createFormModal.position.left - modalWidth / 2;
+    let left = createForm.position.left - modalWidth / 2;
     if (left < 256) left = 256 + 24;
     else if (left + modalWidth > screenWidth) left = screenWidth - modalWidth - 24;
 
-    let { top } = createFormModal.position;
+    let { top } = createForm.position;
     if (top + modalHeight > screenHeight) top -= modalHeight;
 
-    actions.createFormModal.setStyle({ left, top, opacity: 100 });
+    createFormActions.setStyle({ left, top, opacity: 100 });
 
-    actions.createFormModal.setMount(true);
+    createFormActions.setMount(true);
   }, [modalOpen]);
 
   /**
@@ -62,10 +64,10 @@ export default function useCreateFormModal({
   const modal = useMemo(
     () => (
       <ModalPortal>
-        <CreateForm ref={createFormModalRef} style={{ ...createFormModal.style }} closeModal={closeModal} />
+        <CreateForm ref={createFormModalRef} style={{ ...createForm.style }} closeModal={closeModal} />
       </ModalPortal>
     ),
-    [modalOpen, closeModal, createFormModal.style],
+    [modalOpen, closeModal, createForm.style],
   );
 
   return { CreateFormModal: modal, openCreateFormModal: openModal };

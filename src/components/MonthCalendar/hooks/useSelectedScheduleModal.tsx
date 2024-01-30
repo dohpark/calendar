@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { countWeeksInMonthCalendar } from '@/utils/calendar';
 import useModal from '@/hooks/useModal';
-import { useMonthCalendar } from '@/store/monthCalendar';
-import SelectedSchedule from '@/components/MonthCalendar/modals/SelectedSchedule';
+import { useMonthCalendarStore } from '@/store/monthCalendar';
+import SelectedSchedule from '@/components/SelectedSchedule';
+import { useSelectedScheduleStore } from '@/store/selectedSchedule';
 
 /**
  * selectedScheduleModal의 상태 관리 훅
@@ -10,9 +11,11 @@ import SelectedSchedule from '@/components/MonthCalendar/modals/SelectedSchedule
 export default function useSelectedScheduleModal({ selectedDate }: { selectedDate: Date }) {
   const {
     calendar: { dateBoxSize },
-    selectedScheduleModal: { position, style },
+  } = useMonthCalendarStore();
+  const {
+    selectedSchedule: { position, style },
     actions,
-  } = useMonthCalendar();
+  } = useSelectedScheduleStore();
 
   const screenWidth = dateBoxSize.width * 7 + 256;
   const screenHeight = dateBoxSize.height * countWeeksInMonthCalendar(selectedDate) + 88;
@@ -24,7 +27,7 @@ export default function useSelectedScheduleModal({ selectedDate }: { selectedDat
     openModal: openSelectedScheduleModal,
     closeModal: closeSelectedScheduleModal,
     modalOpen: selectedScheduleModalOpen,
-  } = useModal({ reset: () => actions.selectedScheduleModal.setStyle({ opacity: 0 }) });
+  } = useModal({ reset: () => actions.setStyle({ opacity: 0 }) });
 
   // 선택한 스케줄 모달 생성 위치 계산
   useEffect(() => {
@@ -49,7 +52,7 @@ export default function useSelectedScheduleModal({ selectedDate }: { selectedDat
 
     if (top + modalHeight > screenHeight) top -= modalHeight - 24;
 
-    actions.selectedScheduleModal.setStyle({ left, top, opacity: 100 });
+    actions.setStyle({ left, top, opacity: 100 });
   }, [position, selectedScheduleModalOpen]);
 
   const modal = (

@@ -1,5 +1,5 @@
 import Layer from '@/components/shared/layouts/Layer';
-import LayerItem from '@/components/MonthCalendar/modals/LayerItem';
+import LayerItem from '@/components/shared/LayerItem';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 import Close from '@public/svg/close.svg';
 import Text from '@public/svg/text.svg';
@@ -10,8 +10,8 @@ import { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
 import Inline from '@/components/shared/layouts/Inline';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
-import { useMainCalendar } from '@/store/mainCalendar';
-import { useMonthCalendar } from '@/store/monthCalendar';
+import { useMainCalendarStore } from '@/store/mainCalendar';
+import { useSelectedScheduleStore } from '@/store/selectedSchedule';
 
 interface SelectedScheduleProps {
   style: { top: number; left: number };
@@ -20,14 +20,14 @@ interface SelectedScheduleProps {
 
 function SelectedSchedule({ close, style }: SelectedScheduleProps, ref: ForwardedRef<HTMLDivElement>) {
   const {
-    selectedScheduleModal: {
+    selectedSchedule: {
       info: { id, title, from, until, description, type },
     },
-  } = useMonthCalendar();
+  } = useSelectedScheduleStore();
 
   const startDate = new Date(from);
   const endDate = new Date(until);
-  const { selectedDate } = useMainCalendar();
+  const { selectedDate } = useMainCalendarStore();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
