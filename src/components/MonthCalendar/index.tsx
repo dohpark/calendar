@@ -115,7 +115,7 @@ export default function MonthCalendar() {
 
   return (
     <>
-      <div className="grid grid-cols-7 text-xs text-center text-gray-500">
+      <div className="grid grid-cols-7 text-xs text-center text-gray-500 select-none">
         {DAYS_OF_THE_WEEK.map((value) => (
           <div key={value} className="border-l pt-2">
             {value}

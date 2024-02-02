@@ -4,7 +4,8 @@ import OutsideDetecter from '@/hooks/useOutsideDetector';
 import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 import { useMonthCalendarStore } from '@/store/monthCalendar';
 import { useSelectedScheduleStore } from '@/store/selectedSchedule';
-import Layer from '../shared/layouts/Layer';
+import ScheduleItem from '@/components/shared/ScheduleItem';
+import Layer from '@/components/shared/layouts/Layer';
 
 interface SchedulesProps {
   data: ScheduleWithDateAndOrder;
@@ -91,19 +92,11 @@ const DateBox = forwardRef(
           </div>
           <div>
             {schedules.map((schedule) => (
-              <div className="h-6" key={schedule.id}>
-                <button
-                  className={`cursor-pointer text-left align-middle px-2 rounded leading-[22px] block w-full bg-blue-200 ${getColor(
-                    schedule.type,
-                  )}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleScheduleItemClick(e, schedule);
-                  }}
-                >
-                  {schedule.title}
-                </button>
-              </div>
+              <ScheduleItem
+                type={schedule.type}
+                title={schedule.title}
+                onClick={(e) => handleScheduleItemClick(e, schedule)}
+              />
             ))}
           </div>
         </Layer>
