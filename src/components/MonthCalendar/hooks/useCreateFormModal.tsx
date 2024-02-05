@@ -1,33 +1,24 @@
-import { RefObject, useEffect, useMemo, useRef } from 'react';
-
+import { useEffect, useMemo, useRef } from 'react';
 import useModal from '@/hooks/useModal';
 import CreateForm from '@/components/CreateForm';
-import { countWeeksInMonthCalendar } from '@/utils/calendar';
 import { useMonthCalendarStore } from '@/store/monthCalendar';
 import { useCreateFormStore } from '@/store/createForm';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 
 /**
  * createFormModal 상태관리 훅
  */
-export default function useCreateFormModal({
-  selectedDate,
-  dateContainerRef,
-}: {
-  selectedDate: Date;
-  dateContainerRef: RefObject<HTMLDivElement>;
-}) {
-  const { calendar, actions: monthCalendarActions } = useMonthCalendarStore();
+export default function useCreateFormModal() {
+  const { calendarUnit } = useMainCalendarStore();
+  const { actions: monthCalendarActions } = useMonthCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const createFormModalRef = useRef<HTMLFormElement>(null);
 
   // 모달 닫을 시 reset
   const resetDrag = () => {
-    if (!dateContainerRef.current) return;
-    Array.from(dateContainerRef.current.children).forEach((target) => {
-      target.classList.remove('bg-blue-50');
-    });
-    monthCalendarActions.setMouseDown(false);
+    if (calendarUnit === 'M') monthCalendarActions.setMouseDown(false);
+
     createFormActions.setMount(false);
     createFormActions.setStyle({ opacity: 0 });
   };
@@ -38,13 +29,12 @@ export default function useCreateFormModal({
   useEffect(() => {
     if (!modalOpen) return;
     if (createForm.mounted) return;
-    if (!dateContainerRef.current) return;
     if (!createFormModalRef.current) return;
 
     const modalWidth = createFormModalRef.current.offsetWidth;
     const modalHeight = createFormModalRef.current.offsetHeight;
-    const screenWidth = calendar.dateBoxSize.width * 7 + 256;
-    const screenHeight = calendar.dateBoxSize.height * countWeeksInMonthCalendar(selectedDate) + 88;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
     let left = createForm.position.left - modalWidth / 2;
     if (left < 256) left = 256 + 24;
@@ -54,7 +44,6 @@ export default function useCreateFormModal({
     if (top + modalHeight > screenHeight) top -= modalHeight;
 
     createFormActions.setStyle({ left, top, opacity: 100 });
-
     createFormActions.setMount(true);
   }, [modalOpen]);
 
@@ -70,5 +59,5 @@ export default function useCreateFormModal({
     [modalOpen, closeModal, createForm.style],
   );
 
-  return { CreateFormModal: modal, openCreateFormModal: openModal };
+  return { CreateFormModal: modal, openCreateFormModal: openModal, modalOpen };
 }

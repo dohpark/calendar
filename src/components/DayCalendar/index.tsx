@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-
 import Split from '@/components/shared/layouts/Split';
 import Expand from '@public/svg/expand_vertical.svg';
 import IconButton from '@/components/shared/IconButton';

@@ -1,4 +1,4 @@
-import { FormEvent, ForwardedRef, forwardRef, useEffect, useRef } from 'react';
+import { FormEvent, ForwardedRef, forwardRef, useRef } from 'react';
 import Layer from '@/components/shared/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
@@ -8,7 +8,6 @@ import { useMainCalendarStore } from '@/store/mainCalendar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import LayerItem from '@/components/shared/LayerItem';
-import { useMonthCalendarStore } from '@/store/monthCalendar';
 import { useCreateFormStore } from '@/store/createForm';
 import CalendarInput from './CalendarInput';
 import TimeInput from './TimeInput';
@@ -19,26 +18,10 @@ interface CreateFormProps {
 }
 
 function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedRef<HTMLFormElement>) {
-  const {
-    calendar: { dragDate },
-    actions: { setDragDate },
-  } = useMonthCalendarStore();
-
   const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    createFormActions.setForm({
-      type: 'event',
-      title: '',
-      description: null,
-      from: dragDate.start < dragDate.end ? dragDate.start : dragDate.end,
-      until: dragDate.start > dragDate.end ? dragDate.start : dragDate.end,
-      allDay: true,
-    });
-  }, []);
 
   const queryClient = useQueryClient();
   const { mutate: createSchedule } = useMutation({
@@ -57,22 +40,18 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
     ) {
       mainCalendarActions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
     }
-    setDragDate({ start: targetDate, end: createForm.form.until });
   };
 
   const setEventEndDate = (targetDate: Date) => {
     createFormActions.setForm({ until: targetDate });
-    setDragDate({ end: targetDate });
   };
 
   const initTodo = () => {
     createFormActions.setForm({ until: createForm.form.from, type: 'todo' });
-    setDragDate({ start: createForm.form.from, end: createForm.form.from });
   };
 
   const setTodoDate = (targetDate: Date) => {
     createFormActions.setForm({ from: targetDate, until: targetDate });
-    setDragDate({ start: targetDate, end: targetDate });
     if (
       targetDate.getFullYear() !== createForm.form.from.getFullYear() ||
       targetDate.getMonth() !== createForm.form.from.getMonth()

@@ -15,12 +15,12 @@ import useCreateFormModal from './hooks/useCreateFormModal';
 export default function MonthCalendar() {
   const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
   const { calendar, actions: monthCalendarActions } = useMonthCalendarStore();
-  const { actions: createFormActions } = useCreateFormStore();
+  const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const dateContainerRef = useRef<HTMLDivElement>(null);
 
   const { data, isSuccess } = useMonthData({ selectedDate });
-  const { CreateFormModal, openCreateFormModal } = useCreateFormModal({ selectedDate, dateContainerRef });
+  const { CreateFormModal, openCreateFormModal, modalOpen } = useCreateFormModal();
   const { SelectedScheduleModal, openSelectedScheduleModal } = useSelectedScheduleModal({ selectedDate });
 
   // selectedDate의 월 달력 내의 날짜 생성
@@ -31,17 +31,6 @@ export default function MonthCalendar() {
     targetDate.setDate(targetDate.getDate() - days + count);
     return { year: targetDate.getFullYear(), month: targetDate.getMonth() + 1, date: targetDate.getDate() };
   });
-
-  // 찾고 있는 날짜가 selectedMonthDateArray의 몇번째 index인지 확인 만약에 없으면 가장 마지막 index 반환
-  const filterDate = (date: { year: number; month: number; date: number }, targetDate: Date) =>
-    date.year === targetDate.getFullYear() &&
-    date.month === targetDate.getMonth() + 1 &&
-    date.date === targetDate.getDate();
-  const getTargetDateIndex = (targetType: Date) => {
-    const index = selectedMonthDateArray.findIndex((date) => filterDate(date, targetType));
-    if (index === -1) return selectedMonthDateArray.length - 1;
-    return index;
-  };
 
   // ResizeObserver를 활용하여 window 크기 변동시 자동으로 dateBoxSize 크기를 저장
   useEffect(() => {
@@ -63,17 +52,34 @@ export default function MonthCalendar() {
     };
   }, [selectedDate.getFullYear(), selectedDate.getMonth()]);
 
-  // dragDate의 변화 및 mouseDown에 맞춰 drag한 날짜들 배경색상 변화
+  // 찾고 있는 날짜가 selectedMonthDateArray의 몇번째 index인지 확인 만약에 없으면 가장 마지막 index 반환
+  const filterDate = (date: { year: number; month: number; date: number }, targetDate: Date) =>
+    date.year === targetDate.getFullYear() &&
+    date.month === targetDate.getMonth() + 1 &&
+    date.date === targetDate.getDate();
+  const getTargetDateIndex = (targetType: Date) => {
+    const index = selectedMonthDateArray.findIndex((date) => filterDate(date, targetType));
+    if (index === -1) return selectedMonthDateArray.length - 1;
+    return index;
+  };
+
+  // createForm의 시작일, 종료일에 맞춰 dragIndex 변경
+  useEffect(() => {
+    if (!calendar.mouseDown) return;
+    monthCalendarActions.setDragIndex({
+      start: getTargetDateIndex(createForm.form.from),
+      end: getTargetDateIndex(createForm.form.until),
+    });
+  }, [createForm.form.from, createForm.form.until]);
+
+  // dragIndex의 변화에 맞춰 createFormModal의 위치값 변경
   useEffect(() => {
     if (!dateContainerRef.current) return;
     if (!calendar.mouseDown) return;
-    if (!calendar.dragDate) return;
+    if (!calendar.dragIndex) return;
 
-    const dragStartIndex = getTargetDateIndex(calendar.dragDate.start);
-    const dragEndIndex = getTargetDateIndex(calendar.dragDate.end);
-
-    const dragStartElement = Array.from(dateContainerRef.current.children)[dragStartIndex] as HTMLDivElement;
-    const dragEndElement = Array.from(dateContainerRef.current.children)[dragEndIndex] as HTMLDivElement;
+    const dragStartElement = Array.from(dateContainerRef.current.children)[calendar.dragIndex.start] as HTMLDivElement;
+    const dragEndElement = Array.from(dateContainerRef.current.children)[calendar.dragIndex.end] as HTMLDivElement;
 
     createFormActions.setPosition({
       top:
@@ -87,17 +93,33 @@ export default function MonthCalendar() {
           dragStartElement.offsetWidth) /
         2,
     });
+  }, [calendar.dragIndex, calendar.mouseDown]);
 
-    let [smallIndex, largeIndex] = [dragStartIndex, dragEndIndex];
+  // createFormModal이 열릴시 시작일, 종료일 데이터 전달
+  useEffect(() => {
+    if (!modalOpen) return;
+    let [smallIndex, largeIndex] = [calendar.dragIndex.start, calendar.dragIndex.end];
     if (smallIndex > largeIndex) {
       [smallIndex, largeIndex] = [largeIndex, smallIndex];
     }
 
-    Array.from(dateContainerRef.current.children).forEach((target, index) => {
-      if (smallIndex <= index && index <= largeIndex) target.classList.add('bg-blue-50');
-      else target.classList.remove('bg-blue-50');
+    createFormActions.setForm({
+      type: 'event',
+      title: '',
+      description: '',
+      allDay: true,
+      from: new Date(
+        selectedMonthDateArray[smallIndex].year,
+        selectedMonthDateArray[smallIndex].month - 1,
+        selectedMonthDateArray[smallIndex].date,
+      ),
+      until: new Date(
+        selectedMonthDateArray[largeIndex].year,
+        selectedMonthDateArray[largeIndex].month - 1,
+        selectedMonthDateArray[largeIndex].date,
+      ),
     });
-  }, [calendar.dragDate, calendar.mouseDown]);
+  }, [modalOpen]);
 
   // 날짜 버튼 css 다이나믹하게 주기
   const getDateButtonCss = (year: number, month: number, date: number) => {
@@ -111,6 +133,16 @@ export default function MonthCalendar() {
     if (month !== selectedDate.getMonth() + 1) return 'text-gray-400';
 
     return 'text-gray-800';
+  };
+
+  // 날짜 드래그 css 주기
+  const getDateBoxBackgroundCss = (index: number) => {
+    let [smallIndex, largeIndex] = [calendar.dragIndex.start, calendar.dragIndex.end];
+    if (smallIndex > largeIndex) {
+      [smallIndex, largeIndex] = [largeIndex, smallIndex];
+    }
+
+    return calendar.mouseDown && smallIndex <= index && index <= largeIndex ? 'bg-blue-50' : '';
   };
 
   return (
@@ -130,18 +162,20 @@ export default function MonthCalendar() {
           <div
             role="gridcell"
             tabIndex={0}
-            className="border-l border-b grid grid-rows-auto-start gap-0 auto-rows-min"
+            className={`border-l border-b grid grid-rows-auto-start gap-0 auto-rows-min ${getDateBoxBackgroundCss(
+              index,
+            )}`}
             key={`${year}-${month}-${date}`}
             aria-label={`${year}-${month}-${date}-cell`}
             onMouseDown={() => {
-              monthCalendarActions.setDragDate({
-                start: new Date(year, month - 1, date),
-                end: new Date(year, month - 1, date),
+              monthCalendarActions.setDragIndex({
+                start: index,
+                end: index,
               });
               monthCalendarActions.setMouseDown(true);
             }}
             onMouseEnter={() => {
-              if (calendar.mouseDown) monthCalendarActions.setDragDate({ end: new Date(year, month - 1, date) });
+              if (calendar.mouseDown) monthCalendarActions.setDragIndex({ end: index });
             }}
             onMouseUp={() => {
               if (calendar.mouseDown) openCreateFormModal();

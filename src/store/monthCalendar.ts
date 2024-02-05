@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-interface DragState {
-  start: Date;
-  end: Date;
+interface DragIndex {
+  start: number;
+  end: number;
 }
 
 interface DateBoxSize {
@@ -14,7 +14,7 @@ interface DateBoxSize {
 type CalendarState = {
   calendar: {
     mouseDown: boolean;
-    dragDate: DragState;
+    dragIndex: DragIndex;
     dateBoxSize: DateBoxSize;
   };
 };
@@ -22,7 +22,7 @@ type CalendarState = {
 type CalendarAction = {
   actions: {
     setMouseDown: (mouseDown: boolean) => void;
-    setDragDate: (dragDate: Partial<DragState>) => void;
+    setDragIndex: (dragDate: Partial<DragIndex>) => void;
     setDateBoxSize: (dateBoxSize: Partial<DateBoxSize>) => void;
   };
 };
@@ -31,9 +31,9 @@ const useMonthCalendarStore = create<CalendarState & CalendarAction>()(
   immer((set) => ({
     calendar: {
       mouseDown: false,
-      dragDate: {
-        start: new Date(),
-        end: new Date(),
+      dragIndex: {
+        start: 0,
+        end: 0,
       },
       dateBoxSize: {
         width: 0,
@@ -45,9 +45,9 @@ const useMonthCalendarStore = create<CalendarState & CalendarAction>()(
         set((state) => {
           state.calendar.mouseDown = mouseDown;
         }),
-      setDragDate: (dragDate) =>
+      setDragIndex: (dragIndex) =>
         set((state) => {
-          state.calendar.dragDate = { ...state.calendar.dragDate, ...dragDate };
+          state.calendar.dragIndex = { ...state.calendar.dragIndex, ...dragIndex };
         }),
       setDateBoxSize: (dateBoxSize) =>
         set((state) => {
