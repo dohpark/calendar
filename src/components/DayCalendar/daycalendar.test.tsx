@@ -2,15 +2,18 @@ import TestingQueryClientProvider from '@/test-utils/TestingQueryClientProvider'
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { useMainCalendarStore } from '@/store/mainCalendar';
 import { act } from 'react-dom/test-utils';
-import DayCalendar from '.';
+import Main from '@/components/Main';
 
 test('시간 칸을 클릭하면 할일 및 이벤트 생성 모달이 나타난다.', () => {});
 
 test('시간을 드래그하여 이벤트를 생성할 수 있다. 드래그하여 선택한 시간의 배경 색상은 blue50이다.', async () => {
-  render(<DayCalendar />, { wrapper: TestingQueryClientProvider });
+  render(<Main />, { wrapper: TestingQueryClientProvider });
 
-  // 2023년 10월 28일로 날짜 설정
   const { result } = renderHook(() => useMainCalendarStore());
+
+  // 일달력으로 설정
+  act(() => result.current.actions.setCalendarUnit('D'));
+  // 2023년 10월 28일로 날짜 설정
   act(() => result.current.actions.setSelectedDate(new Date(2023, 9, 28)));
 
   // 10월 28일 00시에서 10월 28일 01시까지 마우스 드래그

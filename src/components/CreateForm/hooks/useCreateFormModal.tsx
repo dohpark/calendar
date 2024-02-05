@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import useModal from '@/hooks/useModal';
 import CreateForm from '@/components/CreateForm';
-import { useMonthCalendarStore } from '@/store/monthCalendar';
 import { useCreateFormStore } from '@/store/createForm';
 import { useMainCalendarStore } from '@/store/mainCalendar';
 
@@ -9,16 +8,13 @@ import { useMainCalendarStore } from '@/store/mainCalendar';
  * createFormModal 상태관리 훅
  */
 export default function useCreateFormModal() {
-  const { calendarUnit } = useMainCalendarStore();
-  const { actions: monthCalendarActions } = useMonthCalendarStore();
+  const { isSidebarOpen } = useMainCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const createFormModalRef = useRef<HTMLFormElement>(null);
 
   // 모달 닫을 시 reset
   const resetDrag = () => {
-    if (calendarUnit === 'M') monthCalendarActions.setMouseDown(false);
-
     createFormActions.setMount(false);
     createFormActions.setStyle({ opacity: 0 });
   };
@@ -37,7 +33,8 @@ export default function useCreateFormModal() {
     const screenHeight = window.innerHeight;
 
     let left = createForm.position.left - modalWidth / 2;
-    if (left < 256) left = 256 + 24;
+    if (isSidebarOpen && left < 256) left = 256 + 24;
+    else if (!isSidebarOpen && left < 24) left = 24;
     else if (left + modalWidth > screenWidth) left = screenWidth - modalWidth - 24;
 
     let { top } = createForm.position;
@@ -59,5 +56,5 @@ export default function useCreateFormModal() {
     [modalOpen, closeModal, createForm.style],
   );
 
-  return { CreateFormModal: modal, openCreateFormModal: openModal, modalOpen };
+  return { CreateFormModal: modal, openCreateFormModal: openModal, createFormModalOpen: modalOpen };
 }

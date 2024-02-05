@@ -9,10 +9,16 @@ import { useMonthCalendarStore } from '@/store/monthCalendar';
 import { useCreateFormStore } from '@/store/createForm';
 import ScheduleItems from './ScheduleItems';
 import useMonthData from './hooks/useMonthData';
-import useSelectedScheduleModal from './hooks/useSelectedScheduleModal';
-import useCreateFormModal from './hooks/useCreateFormModal';
 
-export default function MonthCalendar() {
+export default function MonthCalendar({
+  openCreateFormModal,
+  createFormModalOpen,
+  openSelectedScheduleModal,
+}: {
+  openCreateFormModal: () => void;
+  createFormModalOpen: boolean;
+  openSelectedScheduleModal: () => void;
+}) {
   const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
   const { calendar, actions: monthCalendarActions } = useMonthCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
@@ -20,8 +26,6 @@ export default function MonthCalendar() {
   const dateContainerRef = useRef<HTMLDivElement>(null);
 
   const { data, isSuccess } = useMonthData({ selectedDate });
-  const { CreateFormModal, openCreateFormModal, modalOpen } = useCreateFormModal();
-  const { SelectedScheduleModal, openSelectedScheduleModal } = useSelectedScheduleModal({ selectedDate });
 
   // selectedDate의 월 달력 내의 날짜 생성
   const selectedMonthDateArray = Array.from({ length: countDaysInMonthCalendar(selectedDate) }, (_, count) => {
@@ -97,7 +101,11 @@ export default function MonthCalendar() {
 
   // createFormModal이 열릴시 시작일, 종료일 데이터 전달
   useEffect(() => {
-    if (!modalOpen) return;
+    if (!createFormModalOpen) {
+      monthCalendarActions.setMouseDown(false);
+      return;
+    }
+
     let [smallIndex, largeIndex] = [calendar.dragIndex.start, calendar.dragIndex.end];
     if (smallIndex > largeIndex) {
       [smallIndex, largeIndex] = [largeIndex, smallIndex];
@@ -119,7 +127,7 @@ export default function MonthCalendar() {
         selectedMonthDateArray[largeIndex].date,
       ),
     });
-  }, [modalOpen]);
+  }, [createFormModalOpen]);
 
   // 날짜 버튼 css 다이나믹하게 주기
   const getDateButtonCss = (year: number, month: number, date: number) => {
@@ -206,8 +214,6 @@ export default function MonthCalendar() {
           </div>
         ))}
       </div>
-      {CreateFormModal}
-      {SelectedScheduleModal}
     </>
   );
 }

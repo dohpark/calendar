@@ -1,24 +1,19 @@
 import { useEffect, useRef } from 'react';
-import { countWeeksInMonthCalendar } from '@/utils/calendar';
 import useModal from '@/hooks/useModal';
-import { useMonthCalendarStore } from '@/store/monthCalendar';
 import SelectedSchedule from '@/components/SelectedSchedule';
 import { useSelectedScheduleStore } from '@/store/selectedSchedule';
 
 /**
  * selectedScheduleModal의 상태 관리 훅
  */
-export default function useSelectedScheduleModal({ selectedDate }: { selectedDate: Date }) {
-  const {
-    calendar: { dateBoxSize },
-  } = useMonthCalendarStore();
+export default function useSelectedScheduleModal() {
   const {
     selectedSchedule: { position, style },
     actions,
   } = useSelectedScheduleStore();
 
-  const screenWidth = dateBoxSize.width * 7 + 256;
-  const screenHeight = dateBoxSize.height * countWeeksInMonthCalendar(selectedDate) + 88;
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
 
   const selectedScheduleModalRef = useRef<HTMLDivElement>(null);
 
