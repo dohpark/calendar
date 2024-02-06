@@ -1,11 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-interface DragDate {
-  start: Date;
-  end: Date;
-}
-
 interface DragState {
   start: number;
   end: number;
@@ -14,7 +9,6 @@ interface DragState {
 type CalendarState = {
   calendar: {
     mouseDown: boolean;
-    dragDate: DragDate;
     dragIndex: DragState;
   };
 };
@@ -22,7 +16,6 @@ type CalendarState = {
 type CalendarAction = {
   actions: {
     setMouseDown: (mouseDown: boolean) => void;
-    setDragDate: (dragDate: Partial<DragDate>) => void;
     setDragIndex: (dragDate: Partial<DragState>) => void;
   };
 };
@@ -44,10 +37,6 @@ const useDayCalendarStore = create<CalendarState & CalendarAction>()(
       setMouseDown: (mouseDown) =>
         set((state) => {
           state.calendar.mouseDown = mouseDown;
-        }),
-      setDragDate: (dragDate) =>
-        set((state) => {
-          state.calendar.dragDate = { ...state.calendar.dragDate, ...dragDate };
         }),
       setDragIndex: (dragIndex) =>
         set((state) => {

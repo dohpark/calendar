@@ -18,7 +18,7 @@ interface CreateFormProps {
 }
 
 function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedRef<HTMLFormElement>) {
-  const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
+  const { selectedDate, calendarUnit, actions: mainCalendarActions } = useMainCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -64,10 +64,16 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
     createFormActions.setForm({ description });
   };
 
-  const setTodoTime = (hour: number, minute: number) => {
+  const setFromTime = (hour: number, minute: number) => {
     const targetDate = new Date(createForm.form.from);
     targetDate.setHours(hour, minute);
     createFormActions.setForm({ from: targetDate });
+  };
+
+  const setUntilTime = (hour: number, minute: number) => {
+    const targetDate = new Date(createForm.form.until);
+    targetDate.setHours(hour, minute);
+    createFormActions.setForm({ until: targetDate });
   };
 
   const startDisabledFilterCallback = (date: Date) => {
@@ -139,7 +145,7 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
           </label>
         </LayerItem>
         <LayerItem Icon={Time}>
-          {createForm.form.type === 'event' ? (
+          {createForm.form.type === 'event' && calendarUnit === 'M' ? (
             <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
               <span className="relative" aria-label="event start date">
                 <CalendarInput
@@ -160,6 +166,36 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
               </span>
             </div>
           ) : null}
+          {createForm.form.type === 'event' && calendarUnit === 'D' ? (
+            <div className="self-center text-sm">
+              <div role="presentation" aria-label="create form selected date">
+                <span className="relative">
+                  <CalendarInput label="start date" date={createForm.form.from} setDate={setTodoDate} />
+                </span>
+                {!createForm.form.allDay ? (
+                  <>
+                    <span className="ml-3 relative">
+                      <TimeInput date={createForm.form.from} setTime={setFromTime} label="start time" />
+                    </span>
+                    <span className="px-2">-</span>
+                    <span className="relative">
+                      <TimeInput date={createForm.form.until} setTime={setUntilTime} label="end time" />
+                    </span>
+                  </>
+                ) : null}
+              </div>
+              <div className="flex items-center mt-2">
+                <input
+                  type="checkbox"
+                  id="allday"
+                  className="w-4 h-4 mr-2"
+                  checked={createForm.form.allDay}
+                  onChange={() => createFormActions.toggleAllDay()}
+                />
+                <label htmlFor="allday">종일</label>
+              </div>
+            </div>
+          ) : null}
           {createForm.form.type === 'todo' ? (
             <div className="self-center text-sm">
               <div role="presentation" aria-label="create form selected date">
@@ -168,7 +204,7 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
                 </span>
                 {!createForm.form.allDay ? (
                   <span className="ml-3 relative">
-                    <TimeInput date={createForm.form.from} setTime={setTodoTime} />
+                    <TimeInput date={createForm.form.from} setTime={setFromTime} label="todo time" />
                   </span>
                 ) : null}
               </div>

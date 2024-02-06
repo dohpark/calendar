@@ -108,7 +108,7 @@ test('이벤트 생성 타입을 할일로 선택하면 시간을 선택하거�
   expect(selectedDate).toHaveValue('10월 5일 (목)');
 
   // 시간 반영 확인
-  const selectedTime = within(modal).getByRole('textbox', { name: /start time/i });
+  const selectedTime = within(modal).getByRole('textbox', { name: /todo time/i });
   expect(selectedTime).toHaveValue('오전 12:00');
 });
 

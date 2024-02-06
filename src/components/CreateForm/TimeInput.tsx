@@ -6,16 +6,17 @@ import TimeListItem from './TimeListItem';
 
 interface TimeInputProps {
   date: Date;
+  label: string;
   setTime: (hour: number, minute: number) => void;
 }
 
-export default function TimeInput({ date, setTime }: TimeInputProps) {
+export default function TimeInput({ date, setTime, label }: TimeInputProps) {
   const [isFocus, setIsFocus] = useState(false);
 
   return (
     <>
       <input
-        aria-label="start time"
+        aria-label={label}
         className="w-20 outline-none rounded px-1 py-1 hover:bg-zinc-100 cursor-pointer"
         value={getTimeDisplay(date.getHours(), date.getMinutes())}
         onClick={() => {

@@ -1,12 +1,26 @@
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import Split from '@/components/shared/layouts/Split';
 import Expand from '@public/svg/expand_vertical.svg';
 import IconButton from '@/components/shared/IconButton';
 import ScheduleItem from '@/components/shared/ScheduleItem';
 import { useDayCalendarStore } from '@/store/dayCalendar';
+import { useCreateFormStore } from '@/store/createForm';
+import { useMainCalendarStore } from '@/store/mainCalendar';
 
-export default function DayCalendar() {
+export default function DayCalendar({
+  openCreateFormModal,
+  createFormModalOpen,
+  openSelectedScheduleModal,
+}: {
+  openCreateFormModal: () => void;
+  createFormModalOpen: boolean;
+  openSelectedScheduleModal: () => void;
+}) {
+  const { selectedDate } = useMainCalendarStore();
   const { calendar, actions: dayCalendarActions } = useDayCalendarStore();
+  const { createForm, actions: createFormActions } = useCreateFormStore();
+
+  console.log(openSelectedScheduleModal, createForm);
 
   const timeContainerRef = useRef<HTMLDivElement>(null);
 
@@ -18,22 +32,69 @@ export default function DayCalendar() {
     return { hour, minute, count };
   });
 
-  // dragDate의 변화 및 mouseDown에 맞춰 drag한 날짜들 배경색상 변화
+  // dragIndex의 변화에 맞춰 createFormModal의 위치값 변경
   useEffect(() => {
     if (!timeContainerRef.current) return;
     if (!calendar.mouseDown) return;
-    if (!calendar.dragDate) return;
+    if (!calendar.dragIndex) return;
 
+    const dragStartElement = Array.from(timeContainerRef.current.children)[calendar.dragIndex.start] as HTMLDivElement;
+    const dragEndElement = Array.from(timeContainerRef.current.children)[calendar.dragIndex.end] as HTMLDivElement;
+
+    createFormActions.setPosition({
+      top:
+        (dragStartElement.getBoundingClientRect().top +
+          dragEndElement.getBoundingClientRect().top +
+          dragStartElement.offsetHeight) /
+        2,
+      left:
+        (dragStartElement.getBoundingClientRect().left +
+          dragEndElement.getBoundingClientRect().left +
+          dragStartElement.offsetWidth) /
+        2,
+    });
+  }, [calendar.dragIndex, calendar.mouseDown]);
+
+  // createFormModal이 열릴시 시작일, 종료일 데이터 전달
+  useEffect(() => {
+    if (!createFormModalOpen) {
+      dayCalendarActions.setMouseDown(false);
+      return;
+    }
     let [smallIndex, largeIndex] = [calendar.dragIndex.start, calendar.dragIndex.end];
     if (smallIndex > largeIndex) {
       [smallIndex, largeIndex] = [largeIndex, smallIndex];
     }
 
-    Array.from(timeContainerRef.current.children).forEach((target, index) => {
-      if (smallIndex <= index && index <= largeIndex) target.classList.add('bg-blue-50');
-      else target.classList.remove('bg-blue-50');
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const date = selectedDate.getDate();
+
+    const startHour = Math.floor((smallIndex * 15) / 60);
+    const startMinute = (smallIndex * 15) % 60;
+
+    const endHour = Math.floor(((largeIndex + 1) * 15) / 60);
+    const endMinute = ((largeIndex + 1) * 15) % 60;
+
+    createFormActions.setForm({
+      type: 'event',
+      title: '',
+      description: '',
+      allDay: false,
+      from: new Date(year, month, date, startHour, startMinute),
+      until: new Date(year, month, date, endHour, endMinute),
     });
-  }, [calendar.dragIndex, calendar.mouseDown]);
+  }, [createFormModalOpen]);
+
+  // 날짜 드래그 css 주기
+  const getTimeBoxBackgroundCss = (index: number) => {
+    let [smallIndex, largeIndex] = [calendar.dragIndex.start, calendar.dragIndex.end];
+    if (smallIndex > largeIndex) {
+      [smallIndex, largeIndex] = [largeIndex, smallIndex];
+    }
+
+    return calendar.mouseDown && smallIndex <= index && index <= largeIndex ? 'bg-blue-50' : '';
+  };
 
   return (
     <div className="overflow-hidden relative select-none">
@@ -78,7 +139,7 @@ export default function DayCalendar() {
               key={`${hour}-${minute}`}
               role="gridcell"
               aria-label={`${hour}-${minute}-cell`}
-              className={`h-3 text-xs ${minute === 45 ? 'border-b' : ''}`}
+              className={`h-3 text-xs ${minute === 45 ? 'border-b' : ''} ${getTimeBoxBackgroundCss(index)}`}
               tabIndex={0}
               onMouseDown={() => {
                 dayCalendarActions.setDragIndex({
@@ -94,7 +155,7 @@ export default function DayCalendar() {
                   });
               }}
               onMouseUp={() => {
-                if (calendar.mouseDown) dayCalendarActions.setMouseDown(false);
+                if (calendar.mouseDown) openCreateFormModal();
               }}
             />
           ))}
