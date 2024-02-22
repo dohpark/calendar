@@ -39,6 +39,7 @@ export default function useCreateFormModal() {
 
     let { top } = createForm.position;
     if (top + modalHeight > screenHeight) top -= modalHeight;
+    if (top < 0) top = 24;
 
     createFormActions.setStyle({ left, top, opacity: 100 });
     createFormActions.setMount(true);

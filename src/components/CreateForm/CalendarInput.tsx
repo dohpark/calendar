@@ -8,9 +8,10 @@ interface CalendarInputProps {
   label: string;
   setDate: (date: Date) => void;
   disabledFilterCallback?: (date: Date) => boolean;
+  className?: string;
 }
 
-export default function CalendarInput({ date, setDate, label, disabledFilterCallback }: CalendarInputProps) {
+export default function CalendarInput({ date, setDate, label, disabledFilterCallback, className }: CalendarInputProps) {
   const [isFocus, setIsFocus] = useState(false);
   return (
     <>
@@ -24,7 +25,7 @@ export default function CalendarInput({ date, setDate, label, disabledFilterCall
         readOnly
       />
       {isFocus ? (
-        <OutsideDetecter callback={() => setIsFocus(false)} classExtend={['absolute', 'top-8', 'left-0']}>
+        <OutsideDetecter callback={() => setIsFocus(false)} classExtend={[className || '']}>
           <MiniCalendar
             selectDate={setDate}
             selectedDate={date}

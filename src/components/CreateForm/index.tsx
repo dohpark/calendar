@@ -3,6 +3,7 @@ import Layer from '@/components/shared/layouts/Layer';
 import Text from '@public/svg/text.svg';
 import Time from '@public/svg/time.svg';
 import Close from '@public/svg/close.svg';
+import ArrowRight from '@public/svg/arrow_right.svg';
 import TextButton from '@/components/shared/TextButton';
 import { useMainCalendarStore } from '@/store/mainCalendar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +19,7 @@ interface CreateFormProps {
 }
 
 function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedRef<HTMLFormElement>) {
-  const { selectedDate, calendarUnit, actions: mainCalendarActions } = useMainCalendarStore();
+  const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -91,6 +92,15 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
     createSchedule();
   };
 
+  // const checkSameDate = () => {
+  //   const { from, until } = createForm.form;
+  //   return (
+  //     from.getFullYear() === until.getFullYear() &&
+  //     from.getMonth() === until.getMonth() &&
+  //     from.getDate() === until.getDate()
+  //   );
+  // };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -145,44 +155,57 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
           </label>
         </LayerItem>
         <LayerItem Icon={Time}>
-          {createForm.form.type === 'event' && calendarUnit === 'M' ? (
-            <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
-              <span className="relative" aria-label="event start date">
-                <CalendarInput
-                  label="start date"
-                  date={createForm.form.from}
-                  setDate={setEventStartDate}
-                  disabledFilterCallback={startDisabledFilterCallback}
-                />
-              </span>
-              <span className="px-2">-</span>
-              <span className="relative" aria-label="event end date">
-                <CalendarInput
-                  label="end date"
-                  date={createForm.form.until}
-                  setDate={setEventEndDate}
-                  disabledFilterCallback={endDisabledFilterCallback}
-                />
-              </span>
-            </div>
-          ) : null}
-          {createForm.form.type === 'event' && calendarUnit === 'D' ? (
-            <div className="self-center text-sm">
+          {createForm.form.type === 'event' ? (
+            <div className="self-center text-sm w-full">
               <div role="presentation" aria-label="create form selected date">
-                <span className="relative">
-                  <CalendarInput label="start date" date={createForm.form.from} setDate={setTodoDate} />
-                </span>
-                {!createForm.form.allDay ? (
-                  <>
-                    <span className="ml-3 relative">
-                      <TimeInput date={createForm.form.from} setTime={setFromTime} label="start time" />
-                    </span>
-                    <span className="px-2">-</span>
+                <div className="flex justify-between items-center">
+                  <div>
                     <span className="relative">
-                      <TimeInput date={createForm.form.until} setTime={setUntilTime} label="end time" />
+                      <CalendarInput
+                        label="start date"
+                        date={createForm.form.from}
+                        setDate={setEventStartDate}
+                        className="absolute top-8 left-0 z-50"
+                      />
                     </span>
-                  </>
-                ) : null}
+                    {!createForm.form.allDay ? (
+                      <span className="relative">
+                        <TimeInput
+                          date={createForm.form.from}
+                          setTime={setFromTime}
+                          label="start time"
+                          disabledFilterCallback={startDisabledFilterCallback}
+                          className="absolute top-8 left-0 z-50"
+                        />
+                      </span>
+                    ) : null}
+                  </div>
+                  <div>
+                    <ArrowRight width={24} height={24} />
+                  </div>
+                  <div className="text-right">
+                    <span className="relative" aria-label="event end date">
+                      <CalendarInput
+                        label="end date"
+                        date={createForm.form.until}
+                        setDate={setEventEndDate}
+                        disabledFilterCallback={endDisabledFilterCallback}
+                        className="absolute top-8 right-0 z-50"
+                      />
+                    </span>
+                    {!createForm.form.allDay ? (
+                      <span className="relative">
+                        <TimeInput
+                          date={createForm.form.until}
+                          setTime={setUntilTime}
+                          label="end time"
+                          disabledFilterCallback={endDisabledFilterCallback}
+                          className="absolute top-8 right-0 z-50"
+                        />
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
               </div>
               <div className="flex items-center mt-2">
                 <input
@@ -204,7 +227,12 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
                 </span>
                 {!createForm.form.allDay ? (
                   <span className="ml-3 relative">
-                    <TimeInput date={createForm.form.from} setTime={setFromTime} label="todo time" />
+                    <TimeInput
+                      date={createForm.form.from}
+                      setTime={setFromTime}
+                      label="todo time"
+                      disabledFilterCallback={startDisabledFilterCallback}
+                    />
                   </span>
                 ) : null}
               </div>

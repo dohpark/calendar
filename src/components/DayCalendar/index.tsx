@@ -55,6 +55,23 @@ export default function DayCalendar({
     });
   }, [calendar.dragIndex, calendar.mouseDown]);
 
+  const filter = (date: { hour: number; minute: number; count: number }, target: Date) =>
+    date.hour === target.getHours() && date.minute === target.getMinutes();
+  const getTargetTimeIndex = (target: Date) => {
+    const index = dateTimeArray.findIndex((date) => filter(date, target));
+    if (index === -1) return dateTimeArray.length - 1;
+    return index;
+  };
+
+  // createForm의 시작일, 종료일에 맞춰 dragIndex 변경
+  useEffect(() => {
+    if (!calendar.mouseDown) return;
+    dayCalendarActions.setDragIndex({
+      start: getTargetTimeIndex(createForm.form.from),
+      end: getTargetTimeIndex(createForm.form.until) - 1,
+    });
+  }, [createForm.form.from, createForm.form.until]);
+
   // createFormModal이 열릴시 시작일, 종료일 데이터 전달
   useEffect(() => {
     if (!createFormModalOpen) {
