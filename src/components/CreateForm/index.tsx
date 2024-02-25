@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import LayerItem from '@/components/shared/LayerItem';
 import { useCreateFormStore } from '@/store/createForm';
+import { isSameDate } from '@/utils/calendar';
 import CalendarInput from './CalendarInput';
 import TimeInput from './TimeInput';
 
@@ -19,7 +20,7 @@ interface CreateFormProps {
 }
 
 function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedRef<HTMLFormElement>) {
-  const { selectedDate, actions: mainCalendarActions } = useMainCalendarStore();
+  const { selectedDate, calendarUnit, actions: mainCalendarActions } = useMainCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -34,12 +35,30 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
   });
 
   const setEventStartDate = (targetDate: Date) => {
-    createFormActions.setForm({ from: targetDate });
+    targetDate.setHours(createForm.form.from.getHours());
+    targetDate.setMinutes(createForm.form.from.getMinutes());
+
+    const delta = createForm.form.from.getTime() - targetDate.getTime();
+    const until = new Date(createForm.form.until.getTime() - delta);
+
+    createFormActions.setForm({ from: targetDate, until });
+
     if (
-      targetDate.getFullYear() !== createForm.form.from.getFullYear() ||
-      targetDate.getMonth() !== createForm.form.from.getMonth()
+      calendarUnit === 'M' &&
+      (targetDate.getFullYear() !== createForm.form.from.getFullYear() ||
+        targetDate.getMonth() !== createForm.form.from.getMonth())
     ) {
       mainCalendarActions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
+    }
+
+    if (calendarUnit === 'W') {
+      // TODO
+    }
+
+    if (calendarUnit === 'D' && !isSameDate(targetDate, createForm.form.from)) {
+      mainCalendarActions.setSelectedDate(
+        new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()),
+      );
     }
   };
 
@@ -91,15 +110,6 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
     e.preventDefault();
     createSchedule();
   };
-
-  // const checkSameDate = () => {
-  //   const { from, until } = createForm.form;
-  //   return (
-  //     from.getFullYear() === until.getFullYear() &&
-  //     from.getMonth() === until.getMonth() &&
-  //     from.getDate() === until.getDate()
-  //   );
-  // };
 
   return (
     <form
