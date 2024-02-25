@@ -87,7 +87,11 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
   const setFromTime = (hour: number, minute: number) => {
     const targetDate = new Date(createForm.form.from);
     targetDate.setHours(hour, minute);
-    createFormActions.setForm({ from: targetDate });
+
+    const delta = createForm.form.from.getTime() - targetDate.getTime();
+    const until = new Date(createForm.form.until.getTime() - delta);
+
+    createFormActions.setForm({ from: targetDate, until });
   };
 
   const setUntilTime = (hour: number, minute: number) => {
