@@ -70,9 +70,19 @@ export default function MonthCalendar({
   // createForm의 시작일, 종료일에 맞춰 dragIndex 변경
   useEffect(() => {
     if (!calendar.mouseDown) return;
+
+    const start = getTargetDateIndex(createForm.form.from);
+
+    // edge case
+    // until은 까지이므로 00시 0분인 경우 전날을 일컫는다.
+    const end =
+      createForm.form.until.getHours() === 0 && createForm.form.until.getMinutes() === 0
+        ? getTargetDateIndex(new Date(createForm.form.until.getTime() - 1))
+        : getTargetDateIndex(createForm.form.until);
+
     monthCalendarActions.setDragIndex({
-      start: getTargetDateIndex(createForm.form.from),
-      end: getTargetDateIndex(createForm.form.until),
+      start,
+      end,
     });
   }, [createForm.form.from, createForm.form.until]);
 

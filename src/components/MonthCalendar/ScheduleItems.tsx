@@ -93,6 +93,7 @@ const DateBox = forwardRef(
           <div>
             {schedules.map((schedule) => (
               <ScheduleItem
+                key={schedule.id}
                 type={schedule.type}
                 title={schedule.title}
                 onClick={(e) => handleScheduleItemClick(e, schedule)}

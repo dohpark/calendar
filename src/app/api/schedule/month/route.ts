@@ -60,7 +60,13 @@ export async function GET(req: Request) {
       selectedMonthArray.forEach(({ date, schedules }) => {
         const type = targetSchedule.type === 'event' || targetSchedule.type === 'todo' ? targetSchedule.type : 'event';
         const targetScheduleStartDate = getDateExcludingTime(targetSchedule.from);
-        const targetScheduleEndDate = getDateExcludingTime(targetSchedule.until);
+
+        // edge case
+        // until은 까지이므로 00시 0분인 경우 전날을 일컫는다.
+        const targetScheduleEndDate =
+          targetSchedule.until.getHours() === 0 && targetSchedule.until.getMinutes() === 0
+            ? getDateExcludingTime(new Date(targetSchedule.until.getTime() - 1))
+            : getDateExcludingTime(targetSchedule.until);
 
         if (targetScheduleStartDate <= date && date <= targetScheduleEndDate) {
           let renderType: RenderType = 'continue';
