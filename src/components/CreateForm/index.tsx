@@ -116,6 +116,16 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // 00시 00분 방어 코드
+    if (createForm.form.allDay) {
+      createForm.form.from.setHours(0);
+      createForm.form.from.setMinutes(0);
+
+      createForm.form.until.setHours(0);
+      createForm.form.until.setMinutes(15);
+    }
+
     createSchedule();
   };
 
