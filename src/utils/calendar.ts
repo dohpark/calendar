@@ -28,21 +28,6 @@ export const countMonthDays = (date: Date) => {
   return targetDate.getDate();
 };
 
-export const createTimeItems = () => {
-  const hours = Array.from({ length: 24 }, (_, hour) => hour);
-  const minutes = [0, 15, 30, 45];
-  const timeItems: { hour: number; minute: number; key: string }[] = [];
-
-  hours.forEach((hour) => {
-    minutes.forEach((minute) => {
-      const item = { hour, minute, key: `${hour}:${minute}` };
-      timeItems.push(item);
-    });
-  });
-
-  return timeItems;
-};
-
 export const getTimeDisplay = (hour: number, minute: number) =>
   `${hour < 12 ? '오전' : '오후'} ${hour % 12 === 0 ? 12 : hour % 12}:${minute.toString().padStart(2, '0')}`;
 

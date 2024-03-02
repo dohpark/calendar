@@ -1,5 +1,5 @@
 interface DefaultItem {
-  key: string;
+  key: string | number;
 }
 
 interface ListBoxProps<T extends DefaultItem> {

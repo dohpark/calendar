@@ -1,19 +1,36 @@
 import { useState } from 'react';
 import OutsideDetecter from '@/hooks/useOutsideDetector';
 import ListBox from '@/components/shared/ListBox';
-import { createTimeItems, getTimeDisplay } from '@/utils/calendar';
+import { getDateExcludingTime, getTimeDisplay, isSameDate } from '@/utils/calendar';
 import TimeListItem from './TimeListItem';
 
 interface TimeInputProps {
   date: Date;
+  compareDate?: Date;
   label: string;
-  setTime: (hour: number, minute: number) => void;
-  disabledFilterCallback: (date: Date) => boolean;
+  setTime: (date: Date) => void;
   className?: string;
 }
 
-export default function TimeInput({ date, setTime, label, disabledFilterCallback, className }: TimeInputProps) {
+export default function TimeInput({ date, setTime, label, className, compareDate }: TimeInputProps) {
   const [isFocus, setIsFocus] = useState(false);
+
+  const createTimeItems = (startDate: Date, type: 'default' | 'compare') => {
+    const length = 24 * 4;
+
+    const targetDate = type === 'compare' ? startDate : getDateExcludingTime(startDate);
+
+    const standard = targetDate.getTime();
+
+    const array = Array.from({ length }, (_, index) => ({
+      key: standard + index,
+      time: standard + 1000 * 15 * 60 * index,
+      index,
+      type,
+    }));
+
+    return array;
+  };
 
   return (
     <>
@@ -28,15 +45,16 @@ export default function TimeInput({ date, setTime, label, disabledFilterCallback
       />
       {isFocus ? (
         <OutsideDetecter callback={() => setIsFocus(false)} classExtend={[className || '']}>
-          <ListBox<{ key: string; hour: number; minute: number }>
+          <ListBox<{ key: number; time: number; index: number; type: 'default' | 'compare' }>
             classExtend={['w-40', 'h-44', 'overflow-y-auto']}
             ItemComponent={TimeListItem}
-            onClick={(hour: number, minute: number) => setTime(hour, minute)}
-            sourceName="time"
-            items={createTimeItems().filter(
-              ({ hour, minute }) =>
-                !disabledFilterCallback(new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, minute)),
-            )}
+            onClick={(targetDate: Date) => setTime(targetDate)}
+            sourceName="info"
+            items={
+              compareDate && isSameDate(date, compareDate)
+                ? createTimeItems(compareDate, 'compare').slice(1)
+                : createTimeItems(date, 'default')
+            }
           />
         </OutsideDetecter>
       ) : null}

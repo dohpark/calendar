@@ -63,6 +63,9 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
   };
 
   const setEventEndDate = (targetDate: Date) => {
+    targetDate.setHours(createForm.form.until.getHours());
+    targetDate.setMinutes(createForm.form.until.getMinutes());
+
     createFormActions.setForm({ until: targetDate });
   };
 
@@ -84,29 +87,22 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
     createFormActions.setForm({ description });
   };
 
-  const setFromTime = (hour: number, minute: number) => {
-    const targetDate = new Date(createForm.form.from);
-    targetDate.setHours(hour, minute);
-
+  const setFromTime = (targetDate: Date) => {
     const delta = createForm.form.from.getTime() - targetDate.getTime();
     const until = new Date(createForm.form.until.getTime() - delta);
 
     createFormActions.setForm({ from: targetDate, until });
   };
 
-  const setUntilTime = (hour: number, minute: number) => {
-    const targetDate = new Date(createForm.form.until);
-    targetDate.setHours(hour, minute);
+  const setUntilTime = (targetDate: Date) => {
     createFormActions.setForm({ until: targetDate });
   };
 
-  const startDisabledFilterCallback = (date: Date) => {
-    if (date > createForm.form.until) return true;
-    return false;
-  };
-
   const endDisabledFilterCallback = (date: Date) => {
-    if (date < createForm.form.from) return true;
+    date.setHours(createForm.form.until.getHours());
+    date.setMinutes(createForm.form.until.getMinutes());
+
+    if (date.getTime() <= createForm.form.from.getTime()) return true;
     return false;
   };
 
@@ -188,7 +184,6 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
                           date={createForm.form.from}
                           setTime={setFromTime}
                           label="start time"
-                          disabledFilterCallback={startDisabledFilterCallback}
                           className="absolute top-8 left-0 z-50"
                         />
                       </span>
@@ -211,9 +206,9 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
                       <span className="relative">
                         <TimeInput
                           date={createForm.form.until}
+                          compareDate={createForm.form.from}
                           setTime={setUntilTime}
                           label="end time"
-                          disabledFilterCallback={endDisabledFilterCallback}
                           className="absolute top-8 right-0 z-50"
                         />
                       </span>
@@ -241,12 +236,7 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
                 </span>
                 {!createForm.form.allDay ? (
                   <span className="ml-3 relative">
-                    <TimeInput
-                      date={createForm.form.from}
-                      setTime={setFromTime}
-                      label="todo time"
-                      disabledFilterCallback={startDisabledFilterCallback}
-                    />
+                    <TimeInput date={createForm.form.from} setTime={setFromTime} label="todo time" />
                   </span>
                 ) : null}
               </div>
