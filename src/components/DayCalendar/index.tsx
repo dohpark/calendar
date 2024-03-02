@@ -6,6 +6,7 @@ import ScheduleItem from '@/components/shared/ScheduleItem';
 import { useDayCalendarStore } from '@/store/dayCalendar';
 import { useCreateFormStore } from '@/store/createForm';
 import { useMainCalendarStore } from '@/store/mainCalendar';
+import { isSameDate } from '@/utils/calendar';
 
 export default function DayCalendar({
   openCreateFormModal,
@@ -59,7 +60,7 @@ export default function DayCalendar({
     date.hour === target.getHours() && date.minute === target.getMinutes();
   const getTargetTimeIndex = (target: Date) => {
     const index = dateTimeArray.findIndex((date) => filter(date, target));
-    if (index === -1) return dateTimeArray.length - 1;
+    if (index === -1 || !isSameDate(target, selectedDate)) return dateTimeArray.length - 1;
     return index;
   };
 
