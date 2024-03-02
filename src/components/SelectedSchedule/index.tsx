@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scheduleApi from '@/api/schedule';
 import { useMainCalendarStore } from '@/store/mainCalendar';
 import { useSelectedScheduleStore } from '@/store/selectedSchedule';
+import { getTimeDisplay } from '@/utils/calendar';
 
 interface SelectedScheduleProps {
   style: { top: number; left: number };
@@ -21,7 +22,7 @@ interface SelectedScheduleProps {
 function SelectedSchedule({ close, style }: SelectedScheduleProps, ref: ForwardedRef<HTMLDivElement>) {
   const {
     selectedSchedule: {
-      info: { id, title, from, until, description, type },
+      info: { id, title, from, until, description, type, allDay },
     },
   } = useSelectedScheduleStore();
 
@@ -71,11 +72,15 @@ function SelectedSchedule({ close, style }: SelectedScheduleProps, ref: Forwarde
         <LayerItem Icon={Time}>
           <div className="self-center text-sm" role="presentation" aria-label="create form selected date">
             <span className="relative" aria-label="event start date">
-              {`${startDate.getMonth() + 1}월 ${startDate.getDate()}일 (${DAYS_OF_THE_WEEK[startDate.getDay()]})`}
+              {`${startDate.getMonth() + 1}월 ${startDate.getDate()}일 (${DAYS_OF_THE_WEEK[startDate.getDay()]}) ${
+                allDay ? '' : `${getTimeDisplay(startDate.getHours(), startDate.getMinutes())}`
+              }`}
             </span>
             <span className="px-2">-</span>
             <span className="relative" aria-label="event end date">
-              {`${endDate.getMonth() + 1}월 ${endDate.getDate()}일 (${DAYS_OF_THE_WEEK[endDate.getDay()]})`}
+              {`${endDate.getMonth() + 1}월 ${endDate.getDate()}일 (${DAYS_OF_THE_WEEK[endDate.getDay()]}) ${
+                allDay ? '' : `${getTimeDisplay(endDate.getHours(), endDate.getMinutes())}`
+              }`}
             </span>
           </div>
         </LayerItem>
