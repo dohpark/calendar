@@ -70,7 +70,11 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
   };
 
   const initTodo = () => {
-    createFormActions.setForm({ until: createForm.form.from, type: 'todo' });
+    createFormActions.setForm({
+      from: createForm.form.from,
+      until: new Date(createForm.form.from.getTime() + 1000 * 60 * 15),
+      type: 'todo',
+    });
   };
 
   const setTodoDate = (targetDate: Date) => {
@@ -81,6 +85,10 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
     ) {
       mainCalendarActions.setSelectedDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
     }
+  };
+
+  const setTodoTime = (target: Date) => {
+    createFormActions.setForm({ from: target, until: new Date(target.getTime() + 1000 * 60 * 15) });
   };
 
   const setDescription = (description: string) => {
@@ -236,7 +244,7 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
                 </span>
                 {!createForm.form.allDay ? (
                   <span className="ml-3 relative">
-                    <TimeInput date={createForm.form.from} setTime={setFromTime} label="todo time" />
+                    <TimeInput date={createForm.form.from} setTime={setTodoTime} label="todo time" />
                   </span>
                 ) : null}
               </div>
