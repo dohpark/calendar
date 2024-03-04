@@ -12,9 +12,6 @@ export default function useSelectedScheduleModal() {
     actions,
   } = useSelectedScheduleStore();
 
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
   const selectedScheduleModalRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -28,6 +25,9 @@ export default function useSelectedScheduleModal() {
   useEffect(() => {
     if (!selectedScheduleModalOpen) return;
     if (!selectedScheduleModalRef.current) return;
+
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
     const modalWidth = selectedScheduleModalRef.current.offsetWidth;
     const modalHeight = selectedScheduleModalRef.current.offsetHeight;
