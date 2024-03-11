@@ -188,7 +188,7 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
               <div role="presentation" aria-label="create form selected date">
                 <div className="flex justify-between items-center">
                   <div>
-                    <span className="relative">
+                    <span className="relative" aria-label="event start date">
                       <CalendarInput
                         label="start date"
                         date={createForm.form.from}
