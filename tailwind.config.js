@@ -24,6 +24,14 @@ module.exports = {
       height: {
         main: 'calc(100vh - 65px)',
       },
+      fontSize: {
+        xxs: [
+          '0.625rem',
+          {
+            lineHeight: '0.75rem',
+          },
+        ],
+      },
     },
   },
   plugins: [tailwindScrollBarHide],
