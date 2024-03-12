@@ -7,6 +7,11 @@ import { useDayCalendarStore } from '@/store/dayCalendar';
 import { useCreateFormStore } from '@/store/createForm';
 import { useMainCalendarStore } from '@/store/mainCalendar';
 import { isSameDate } from '@/utils/calendar';
+import { DayScheduleArrayApi } from '@/types/schedule';
+import scheduleApi from '@/api/schedule';
+import { useQuery } from '@tanstack/react-query';
+import { useSelectedScheduleStore } from '@/store/selectedSchedule';
+import DayScheduleItem from './DayScheduleItem';
 
 export default function DayCalendar({
   openCreateFormModal,
@@ -20,10 +25,18 @@ export default function DayCalendar({
   const { selectedDate } = useMainCalendarStore();
   const { calendar, actions: dayCalendarActions } = useDayCalendarStore();
   const { createForm, actions: createFormActions } = useCreateFormStore();
-
-  console.log(openSelectedScheduleModal, createForm);
+  const { actions: selectedScheduleActions } = useSelectedScheduleStore();
 
   const timeContainerRef = useRef<HTMLDivElement>(null);
+
+  const fetchSchedule = (): Promise<DayScheduleArrayApi> =>
+    scheduleApi.getDate(selectedDate.getFullYear(), selectedDate.getMonth() + 1, selectedDate.getDate());
+
+  const { data, isSuccess } = useQuery({
+    queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`],
+    queryFn: fetchSchedule,
+    refetchOnWindowFocus: false,
+  });
 
   // selectedDate의 월 달력 내의 날짜 생성
   const dateTimeArray = Array.from({ length: 24 * 4 }, (_, count) => {
@@ -60,7 +73,7 @@ export default function DayCalendar({
     date.hour === target.getHours() && date.minute === target.getMinutes();
   const getTargetTimeIndex = (target: Date) => {
     const index = dateTimeArray.findIndex((date) => filter(date, target));
-    if (index === -1 || !isSameDate(target, selectedDate)) return dateTimeArray.length - 1;
+    if (index === -1 || !isSameDate(target, selectedDate)) return dateTimeArray.length;
     return index;
   };
 
@@ -131,9 +144,19 @@ export default function DayCalendar({
             </IconButton>
           </div>
           <div className="mt-1 pl-1">
-            <ScheduleItem type="event" title="test1" onClick={() => {}} classExtend={['pr-3', 'text-xs']} />
-            <ScheduleItem type="event" title="test2" onClick={() => {}} classExtend={['pr-3', 'text-xs']} />
-            <ScheduleItem type="event" title="test3" onClick={() => {}} classExtend={['pr-3', 'text-xs']} />
+            {isSuccess &&
+              data.allDayScheduleArray.map((schedule) => (
+                <ScheduleItem
+                  key={schedule.id}
+                  type={schedule.type}
+                  title={schedule.title}
+                  onClick={() => {
+                    openSelectedScheduleModal();
+                    selectedScheduleActions.setInfo(schedule);
+                  }}
+                  classExtend={['pr-3', 'text-xs']}
+                />
+              ))}
           </div>
         </Split>
       </div>
@@ -144,7 +167,7 @@ export default function DayCalendar({
       >
         <div className="w-16 border-r">
           {Array.from({ length: 23 }, (_, i) => i).map((v) => (
-            <div key={v} className="h-[48px] relative">
+            <div key={v} className="h-16 relative">
               <span className="absolute -bottom-2 text-xs right-2 text-gray-500">
                 {v + 1 < 12 ? `${v + 1} am` : `${v + 1} pm`}
               </span>
@@ -157,7 +180,7 @@ export default function DayCalendar({
               key={`${hour}-${minute}`}
               role="gridcell"
               aria-label={`${hour}-${minute}-cell`}
-              className={`h-3 text-xs ${minute === 45 ? 'border-b' : ''} ${getTimeBoxBackgroundCss(index)}`}
+              className={`h-4 text-xs ${minute === 45 ? 'border-b' : ''} ${getTimeBoxBackgroundCss(index)}`}
               tabIndex={0}
               onMouseDown={() => {
                 dayCalendarActions.setDragIndex({
@@ -175,7 +198,9 @@ export default function DayCalendar({
               onMouseUp={() => {
                 if (calendar.mouseDown) openCreateFormModal();
               }}
-            />
+            >
+              {isSuccess ? <DayScheduleItem data={data.selectedDateArray[index]} /> : null}
+            </div>
           ))}
         </div>
       </Split>
