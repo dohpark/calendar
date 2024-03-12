@@ -29,7 +29,13 @@ function CreateForm({ style = {}, closeModal }: CreateFormProps, ref: ForwardedR
   const { mutate: createSchedule } = useMutation({
     mutationFn: () => scheduleApi.create(createForm.form),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}`] });
+      queryClient.invalidateQueries({
+        queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}`],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`],
+      });
+
       closeModal();
     },
   });

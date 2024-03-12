@@ -43,6 +43,9 @@ function SelectedSchedule({ close, style }: SelectedScheduleProps, ref: Forwarde
     mutationFn: () => scheduleApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}`] });
+      queryClient.invalidateQueries({
+        queryKey: [`${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`],
+      });
       close();
     },
   });
