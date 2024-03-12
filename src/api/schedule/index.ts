@@ -1,4 +1,4 @@
-import { CreateSchedule, ScheduleArrayApi } from '@/types/schedule';
+import { CreateSchedule, ScheduleArrayApi, DayScheduleArrayApi } from '@/types/schedule';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import API from '@/api/routes';
 
@@ -15,7 +15,10 @@ const scheduleApi = {
     axios
       .get(`${API.MONTH_SCHEDULE_URL}?year=${year}&month=${month}`)
       .then((response: AxiosResponse<ScheduleArrayApi>) => response.data.selectedMonthArray),
-  getDay: async () => {},
+  getDate: async (year: number, month: number, date: number) =>
+    axios
+      .get(`${API.DATE_SCHEDULE_URL}?year=${year}&month=${month}&date=${date}`)
+      .then((response: AxiosResponse<DayScheduleArrayApi>) => response.data),
   getWeek: async () => {},
 };
 

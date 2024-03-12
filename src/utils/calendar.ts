@@ -1,3 +1,5 @@
+import { Schedule } from '@/types/schedule';
+
 export const getDisplayedDateWeekUnit = (date: Date) => {
   const targetDate = new Date(date);
   const day = targetDate.getDay();
@@ -93,3 +95,19 @@ export const getDateRange = (date1: Date, date2: Date) => {
   const differenceInDays = differenceInTime / (1000 * 3600 * 24);
   return differenceInDays;
 };
+
+/**
+ * 두 이벤트가 날짜 및 시간 상 겹치는지 확인
+ */
+export const isEventCollide = (A: Schedule, B: Schedule) => A.from < B.until && A.until > B.from;
+
+/**
+ * 두 날짜간 몇분차인지 확인
+ */
+export const getTimeMinuteGap = (A: Date, B: Date) => (A.getTime() - B.getTime()) / (1000 * 60);
+
+/**
+ * 시간 정보만 받아오기
+ */
+export const getTime = (timestamp: Date) =>
+  `${timestamp.getHours().toString().padStart(2, '0')}:${timestamp.getMinutes().toString().padEnd(2, '0')}`;
