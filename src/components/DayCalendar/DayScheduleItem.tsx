@@ -8,8 +8,8 @@ export default function DayScheduleItem({ data }: { data: DateScheduleArray }) {
         const minuteGap = getTimeMinuteGap(new Date(schedule.until), new Date(schedule.from));
 
         const height = `${(16 * minuteGap) / 15}px`;
-        const width = `calc(100% / ${schedule.column} * ${schedule.expand})`;
-        const left = `calc(100% * ${schedule.row} / ${schedule.column})`;
+        const width = `calc(100% / ${schedule.columnSize} * ${schedule.expand})`;
+        const left = `calc(100% * ${schedule.currentColumn} / ${schedule.columnSize})`;
 
         return (
           <div

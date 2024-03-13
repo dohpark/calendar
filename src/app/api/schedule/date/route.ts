@@ -135,15 +135,15 @@ export async function GET(req: Request) {
     }));
 
     todayScheduleGroupsWithColumns.forEach((group) => {
-      const column = group.length;
-      group.forEach((columns, row) => {
-        columns.forEach((schedule) => {
+      const columnSize = group.length;
+      group.forEach((column, currentColumn) => {
+        column.forEach((schedule) => {
           const index = Math.floor((schedule.from.getHours() * 60 + schedule.from.getMinutes()) / 15);
 
           // 확장 가능 여부 계산
           let expand = 1;
 
-          for (let i = row + 1; i < group.length; i += 1) {
+          for (let i = currentColumn + 1; i < group.length; i += 1) {
             const differentColumn = group[i];
             let collided = false;
 
@@ -160,7 +160,7 @@ export async function GET(req: Request) {
             else expand += 1;
           }
 
-          selectedDateArray[index].schedules.push({ ...schedule, row, expand, column });
+          selectedDateArray[index].schedules.push({ ...schedule, currentColumn, expand, columnSize });
         });
       });
     });
