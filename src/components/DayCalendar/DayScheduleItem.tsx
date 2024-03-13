@@ -1,15 +1,15 @@
-import { DateSchedulesWithColumns } from '@/types/schedule';
+import { DateScheduleArray } from '@/types/schedule';
 import { getTime, getTimeMinuteGap } from '@/utils/calendar';
 
-export default function DayScheduleItem({ data }: { data: DateSchedulesWithColumns }) {
+export default function DayScheduleItem({ data }: { data: DateScheduleArray }) {
   return (
     <div className="flex w-[calc(100%-12px)] relative">
-      {data.schedules.map((schedule, index) => {
+      {data.schedules.map((schedule) => {
         const minuteGap = getTimeMinuteGap(new Date(schedule.until), new Date(schedule.from));
 
         const height = `${(16 * minuteGap) / 15}px`;
-        const width = `calc(100% / ${data.columns})`;
-        const left = `calc(100% * ${data.order[index]} / ${data.columns})`;
+        const width = `calc(100% / ${schedule.column} * ${schedule.expand})`;
+        const left = `calc(100% * ${schedule.row} / ${schedule.column})`;
 
         return (
           <div

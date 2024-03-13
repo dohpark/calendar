@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@prisma-client/client';
 import url from 'node:url';
-import { DateSchedulesWithColumns, Schedule } from '@/types/schedule';
+import { DateScheduleArray, Schedule } from '@/types/schedule';
 import { isEventCollide } from '@/utils/calendar';
 
 export async function GET(req: Request) {
@@ -117,22 +117,38 @@ export async function GET(req: Request) {
       todayScheduleGroupsWithColumns.push(columns);
     });
 
-    // 3. 시간별 이벤트로 나뉘기
-    const selectedDateArray: DateSchedulesWithColumns[] = Array.from({ length: 24 * 4 }, () => ({
-      columns: 0,
+    // 3. 확장 가능 여부 계산 및 시간별 이벤트로 나뉘기
+    const selectedDateArray: DateScheduleArray[] = Array.from({ length: 24 * 4 }, () => ({
       schedules: [],
-      order: [],
     }));
 
     todayScheduleGroupsWithColumns.forEach((group) => {
-      const count = group.length;
-      group.forEach((columns, order) => {
+      const column = group.length;
+      group.forEach((columns, row) => {
         columns.forEach((schedule) => {
           const index = Math.floor((schedule.from.getHours() * 60 + schedule.from.getMinutes()) / 15);
 
-          selectedDateArray[index].schedules.push(schedule);
-          selectedDateArray[index].columns = count;
-          selectedDateArray[index].order.push(order);
+          // 확장 가능 여부 계산
+          let expand = 1;
+
+          for (let i = row + 1; i < group.length; i += 1) {
+            const differentColumn = group[i];
+            let collided = false;
+
+            for (let j = 0; j < differentColumn.length; j += 1) {
+              const differentColumnSchedule = differentColumn[j];
+
+              if (isEventCollide(schedule, differentColumnSchedule)) {
+                collided = true;
+                break;
+              }
+            }
+
+            if (collided) break;
+            else expand += 1;
+          }
+
+          selectedDateArray[index].schedules.push({ ...schedule, row, expand, column });
         });
       });
     });

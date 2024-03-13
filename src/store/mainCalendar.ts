@@ -22,7 +22,7 @@ type CalendarAction = {
 };
 
 const useMainCalendarStore = create<CalendarState & CalendarAction>((set) => ({
-  calendarUnit: 'D',
+  calendarUnit: 'M',
   selectedDate: new Date(),
   isSidebarOpen: true,
   actions: {

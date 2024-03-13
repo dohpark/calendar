@@ -23,8 +23,9 @@ export type ScheduleWithDateAndOrder = {
 export type ScheduleArray = ScheduleWithDateAndOrder[];
 export type ScheduleArrayApi = { selectedMonthArray: ScheduleArray };
 
-export type DateSchedulesWithColumns = { columns: number; schedules: Schedule[]; order: number[] };
+export type DateSchedule = Schedule & { row: number; expand: number; column: number };
+export type DateScheduleArray = { schedules: DateSchedule[] };
 export type DayScheduleArrayApi = {
   allDayScheduleArray: Schedule[];
-  selectedDateArray: DateSchedulesWithColumns[];
+  selectedDateArray: DateScheduleArray[];
 };
