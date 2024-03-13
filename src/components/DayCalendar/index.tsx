@@ -11,6 +11,7 @@ import { DayScheduleArrayApi } from '@/types/schedule';
 import scheduleApi from '@/api/schedule';
 import { useQuery } from '@tanstack/react-query';
 import { useSelectedScheduleStore } from '@/store/selectedSchedule';
+import { DAYS_OF_THE_WEEK } from '@/constants/calendar';
 import DayScheduleItem from './DayScheduleItem';
 
 export default function DayCalendar({
@@ -133,8 +134,8 @@ export default function DayCalendar({
         <Split fraction="auto-start" gap="0" classExtend={['text-xs', 'text-gray-500', 'mt-1', 'mb-1']}>
           <div className="w-16 text-right">GMT+09</div>
           <div className="ml-auto mr-auto">
-            <span className="mr-1">토</span>
-            <span>2</span>
+            <span className="mr-1">{DAYS_OF_THE_WEEK[selectedDate.getDay()]}</span>
+            <span>{selectedDate.getDate()}</span>
           </div>
         </Split>
         <Split fraction="auto-start" gap="0" classExtend={['border-gray-200', 'border-b', 'border-t']}>
@@ -160,6 +161,11 @@ export default function DayCalendar({
           </div>
         </Split>
       </div>
+      {/**
+       * TODO:
+       * 아래 컴포넌트의 높이 계산이 방법이 현재 웹앱과 맞지 않다.
+       * 종일 요소의 개수에 따라 높이가 유연하게 바뀔 수 있도록 고안해야한다.
+       */}
       <Split
         fraction="auto-start"
         gap="0"
