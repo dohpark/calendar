@@ -11,21 +11,18 @@ interface ModalPosition {
 interface ModalStyle {
   left: number;
   top: number;
-  opacity: number;
 }
 
 type CreateFormState = {
   createForm: {
     position: Omit<ModalPosition, 'width'>;
     style: ModalStyle;
-    mounted: boolean;
     form: CreateSchedule;
   };
 };
 
 type CreateFormAction = {
   actions: {
-    setMount: (mounted: boolean) => void;
     setPosition: (position: Partial<ModalPosition>) => void;
     setStyle: (style: Partial<ModalStyle>) => void;
     setForm: (form: Partial<CreateSchedule>) => void;
@@ -43,9 +40,7 @@ const useCreateFormStore = create<CreateFormState & CreateFormAction>()(
       style: {
         left: 0,
         top: 0,
-        opacity: 0,
       },
-      mounted: false,
       form: {
         type: 'event',
         title: '',
@@ -56,10 +51,6 @@ const useCreateFormStore = create<CreateFormState & CreateFormAction>()(
       },
     },
     actions: {
-      setMount: (mount) =>
-        set((state) => {
-          state.createForm.mounted = mount;
-        }),
       setPosition: (position) =>
         set((state) => {
           state.createForm.position = { ...state.createForm.position, ...position };

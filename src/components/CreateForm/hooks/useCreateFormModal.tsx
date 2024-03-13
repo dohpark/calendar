@@ -13,18 +13,11 @@ export default function useCreateFormModal() {
 
   const createFormModalRef = useRef<HTMLFormElement>(null);
 
-  // 모달 닫을 시 reset
-  const resetDrag = () => {
-    createFormActions.setMount(false);
-    createFormActions.setStyle({ opacity: 0 });
-  };
-
-  const { openModal, ModalPortal, modalOpen, closeModal } = useModal({ reset: resetDrag });
+  const { openModal, ModalPortal, modalOpen, closeModal } = useModal({});
 
   // 스케줄 생성 모달 생성 위치 계산
   useEffect(() => {
     if (!modalOpen) return;
-    if (createForm.mounted) return;
     if (!createFormModalRef.current) return;
 
     const modalWidth = createFormModalRef.current.offsetWidth;
@@ -41,8 +34,7 @@ export default function useCreateFormModal() {
     if (top + modalHeight > screenHeight) top -= modalHeight;
     if (top < 0) top = 24;
 
-    createFormActions.setStyle({ left, top, opacity: 100 });
-    createFormActions.setMount(true);
+    createFormActions.setStyle({ left, top });
   }, [modalOpen]);
 
   /**
