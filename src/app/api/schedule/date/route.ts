@@ -29,13 +29,25 @@ export async function GET(req: Request) {
         OR: [
           {
             from: {
-              gte: today,
-              lt: nextDay,
+              lte: today,
+            },
+            until: {
+              gt: today,
             },
           },
           {
+            from: {
+              lt: nextDay,
+            },
             until: {
+              gte: nextDay,
+            },
+          },
+          {
+            from: {
               gte: today,
+            },
+            until: {
               lte: nextDay,
             },
           },
