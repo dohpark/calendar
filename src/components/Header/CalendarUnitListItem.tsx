@@ -7,7 +7,7 @@ interface ListItemProps {
 }
 
 export default function CalendarUnitListItem({ calendarUnitItem, onClick: handleClickItem }: ListItemProps) {
-  const { actions } = useMainCalendarStore();
+  const { actions } = useMainCalendarStore();jjkhh
 
   return (
     <li key={calendarUnitItem.key} className=" hover:bg-zinc-100 hover:cursor-pointer">
@@ -15,8 +15,7 @@ export default function CalendarUnitListItem({ calendarUnitItem, onClick: handle
         type="button"
         className="w-full px-4 py-2 grid grid-cols-auto-start items-center"
         onClick={() => {
-          actions.setCalendarUnit(calendarUnitItem.dayEng);
-          handleClickItem();
+
         }}
       >
         <span className="text-sm">{calendarUnitItem.dayKor}</span>
